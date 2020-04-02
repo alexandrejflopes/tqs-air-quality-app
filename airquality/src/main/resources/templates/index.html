@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <title>TQS - Air Quality Meter</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="./styles.css">
     <script src="https://kit.fontawesome.com/f379375b47.js" crossorigin="anonymous"></script>
 </head>
 <body class="d-flex flex-column h-100">
 
-    <div class="jumbotron jumbotron-fluid">
-        <div class="container">
+    <div class="jumbotron jumbotron-fluid" style=" background-image: url('air_fundo.jpeg')">
+        <div class="container" style="color: whitesmoke; background: #00000020; padding: 10px">
             <h1 class="display-4">TQS Air Quality Meter</h1>
             <p class="lead">Minimalist web app that provides details on air quality for a certain region/city</p>
         </div>
@@ -33,12 +33,12 @@
         <div class="container">
 
             <div>
-                <h3>Nearest Stations Readings</h3>
+                <h3>Air Quality Report</h3>
             </div>
 
             <hr />
 
-            <th:block th:each="station : ${station}">
+            <th:block th:each="report : ${report}">
 
                 <div class="card">
                     <h5 class="card-header">Featured</h5>
