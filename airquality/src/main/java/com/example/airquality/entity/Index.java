@@ -24,6 +24,12 @@ public class Index {
         this.dominantPollutant = dominantPollutant;
     }
 
+    public Index(String name, String valueDisplay, String category) {
+        this.name = name;
+        this.valueDisplay = valueDisplay;
+        this.category = category;
+    }
+
     public Index() {}
 
     public String getName() {

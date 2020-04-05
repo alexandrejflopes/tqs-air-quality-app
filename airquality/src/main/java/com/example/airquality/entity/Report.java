@@ -27,7 +27,7 @@ public class Report {
 
     @Column
     @ManyToMany
-    private Map<Pollutant, Concentration> pollutants;
+    private List<Pollutant> pollutants;
 
     @OneToOne(targetEntity=Error.class, fetch=FetchType.EAGER)
     private Error error;
@@ -76,11 +76,11 @@ public class Report {
         this.index = index;
     }
 
-    public Map<Pollutant, Concentration> getPollutants() {
+    public List<Pollutant> getPollutants() {
         return pollutants;
     }
 
-    public void setPollutants(Map<Pollutant, Concentration>  pollutants) {
+    public void setPollutants(List<Pollutant>  pollutants) {
         this.pollutants = pollutants;
     }
 

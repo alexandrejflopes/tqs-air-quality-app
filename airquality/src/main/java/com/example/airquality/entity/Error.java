@@ -1,14 +1,23 @@
 package com.example.airquality.entity;
 
+import org.springframework.lang.Nullable;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Entity
+@Table(name = "reportError")
 public class Error {
 
     @Id
+    @Column(name = "reportErrorCode")
     private String errorCode;
+
+    @Column(name = "reportErrorTitle")
     private String errorTitle;
+
 
     private boolean exists;
 
@@ -16,9 +25,11 @@ public class Error {
     public Error(String errorCode, String errorTitle) {
         this.errorCode = errorCode;
         this.errorTitle = errorTitle;
+        this.exists = true;
     }
 
     public Error() {
+        this.errorCode = "non_existing_error";
         this.exists = false;
     }
 
