@@ -7,15 +7,15 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-@Entity
-@Table(name = "reportError")
+//@Entity
+//@Table(name = "reportError")
 public class Error {
 
-    @Id
-    @Column(name = "reportErrorCode")
+    //@Id
+    //@Column(name = "reportErrorCode")
     private String errorCode;
 
-    @Column(name = "reportErrorTitle")
+    //@Column(name = "reportErrorTitle")
     private String errorTitle;
 
 
@@ -68,4 +68,12 @@ public class Error {
     }
 
 
+    @Override
+    public String toString() {
+        return "Error{" +
+                "errorCode='" + errorCode + '\'' +
+                ", errorTitle='" + errorTitle + '\'' +
+                ", exists=" + exists +
+                '}';
+    }
 }

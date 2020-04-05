@@ -105,10 +105,15 @@ public class ReportService {
 
     public Report requestNewReportForLocation(Location location) throws URISyntaxException, IOException, ParseException {
 
+        String lat = String.valueOf(location.getCoordinates().getLatitude());
+        String lon = String.valueOf(location.getCoordinates().getLongitude());
+
+        //System.err.println(" lat is --> " + lat);
+        //System.err.println(" lon is --> " + lon);
 
         uriBuilder = new URIBuilder("https://api.breezometer.com/air-quality/v2/current-conditions?key=09e19031c4764f0097225dd225826731");
-        uriBuilder.addParameter("lat", (new Formatter()).format("%.6f", location.getCoordinates().getLatitude()).toString() );
-        uriBuilder.addParameter("lon", (new Formatter()).format("%.6f", location.getCoordinates().getLongitude()).toString() );
+        uriBuilder.addParameter("lat", lat );
+        uriBuilder.addParameter("lon", lon );
         uriBuilder.addParameter("features", "breezometer_aqi,local_aqi,health_recommendations,sources_and_effects,dominant_pollutant_concentrations,pollutants_concentrations,pollutants_aqi_information");
         uriBuilder.addParameter("metadata", "true");
 
@@ -130,8 +135,9 @@ public class ReportService {
             String code = (String) errorObject.get("code");
             String title = (String) errorObject.get("title");
 
-            Error error = new Error(code, title);
+            //Error error = new Error(code, title);
 
+            //resultReport.setError(error);
             resultReport.setLocation(location);
             resultReport.setDataAvailable(false);
         }
@@ -139,11 +145,11 @@ public class ReportService {
         else {
             // request timestamp
             String timestampString = (String) ((JSONObject) obj.get("metadata")).get("timestamp");
-            LocalDateTime requestTimestamp = LocalDateTime.parse(timestampString);
+            LocalDateTime requestTimestamp = LocalDateTime.parse(timestampString.replace("Z", ""));
 
 
             // data timestamp
-            LocalDateTime lastUpdate = LocalDateTime.parse((String) dataObject.get("datetime"));
+            LocalDateTime lastUpdate = LocalDateTime.parse(((String) dataObject.get("datetime")).replace("Z", ""));
             boolean dataAvailable = (boolean) dataObject.get("data_available");
 
 
@@ -184,18 +190,20 @@ public class ReportService {
                 }
             }
 
-            Error error = new Error(); // no error
+            // Error error = new Error(); // no error
 
             // setup report
             resultReport.setDataAvailable(dataAvailable);
             resultReport.setLocation(location);
-            resultReport.setError(error);
+            //resultReport.setError(error);
             resultReport.setIndex(index);
             resultReport.setLastUpdatedAt(lastUpdate);
             resultReport.setPollutants(pollutants);
             resultReport.setRequestTimeStamp(requestTimestamp);
 
         }
+
+        System.err.println(" report a devolver --> " + resultReport.toString());
 
         return resultReport;
 
@@ -217,8 +225,8 @@ public class ReportService {
         JSONObject addressObj =(JSONObject)((JSONArray) obj.get("locations")).get(0);
         JSONObject coordinates = (JSONObject) addressObj.get("latLng");
 
-        double latitude = Double.parseDouble((String.valueOf((double) coordinates.get("lat"))).replace(",", "."));
-        double longitude = Double.parseDouble((String.valueOf((double) coordinates.get("lng"))).replace(",", "."));
+        double latitude = (double) coordinates.get("lat");
+        double longitude = (double) coordinates.get("lng");
 
         String city = (String) addressObj.get("adminArea5");
         String county = (String) addressObj.get("adminArea4");

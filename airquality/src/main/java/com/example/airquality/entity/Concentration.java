@@ -38,5 +38,12 @@ public class Concentration {
         this.units = units;
     }
 
-
+    @Override
+    public String toString() {
+        return "Concentration{" +
+                "id=" + id +
+                ", value=" + value +
+                ", units='" + units + '\'' +
+                '}';
+    }
 }

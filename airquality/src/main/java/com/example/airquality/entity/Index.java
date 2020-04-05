@@ -13,7 +13,7 @@ public class Index {
     private String valueDisplay;
     private String category;
 
-    @OneToOne(targetEntity=Pollutant.class, fetch=FetchType.EAGER)
+    @OneToOne(targetEntity=Pollutant.class, fetch=FetchType.EAGER, cascade = {CascadeType.ALL})
     private Pollutant dominantPollutant;
 
 
@@ -62,5 +62,16 @@ public class Index {
 
     public void setDominantPollutant(Pollutant dominantPollutant) {
         this.dominantPollutant = dominantPollutant;
+    }
+
+    @Override
+    public String toString() {
+        return "Index{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", valueDisplay='" + valueDisplay + '\'' +
+                ", category='" + category + '\'' +
+                ", dominantPollutant=" + dominantPollutant.toString() +
+                '}';
     }
 }

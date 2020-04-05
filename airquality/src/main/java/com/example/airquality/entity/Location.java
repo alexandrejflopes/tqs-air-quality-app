@@ -54,4 +54,14 @@ public class Location implements Serializable {
     public void setAddress(String address) {
         this.address = address;
     }
+
+
+    @Override
+    public String toString() {
+        return "Location{" +
+                "countryCode='" + countryCode + '\'' +
+                ", address='" + address + '\'' +
+                ", coordinates=" + coordinates.toString() +
+                '}';
+    }
 }

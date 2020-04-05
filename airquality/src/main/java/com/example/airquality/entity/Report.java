@@ -21,16 +21,16 @@ public class Report {
 
     private boolean dataAvailable;
 
-    @OneToOne(targetEntity=Index.class, fetch=FetchType.EAGER)
+    @OneToOne(targetEntity=Index.class, fetch=FetchType.EAGER, cascade = {CascadeType.ALL})
     private Index index;
 
 
     @Column
-    @ManyToMany
+    @ManyToMany(cascade = {CascadeType.ALL})
     private List<Pollutant> pollutants;
 
-    @OneToOne(targetEntity=Error.class, fetch=FetchType.EAGER)
-    private Error error;
+    //@OneToOne(targetEntity=Error.class, fetch=FetchType.EAGER)
+    //private Error error;
 
 
     public Report() {
@@ -84,12 +84,24 @@ public class Report {
         this.pollutants = pollutants;
     }
 
-    public Error getError() {
+    /*public Error getError() {
         return error;
     }
 
     public void setError(Error error) {
         this.error = error;
-    }
+    }*/
 
+
+    @Override
+    public String toString() {
+        return "Report{" +
+                "requestTimeStamp=" + requestTimeStamp +
+                ", lastUpdatedAt=" + lastUpdatedAt +
+                ", location=" + location.toString() +
+                ", dataAvailable=" + dataAvailable +
+                ", index=" + index.toString() +
+                ", pollutants=" + pollutants.toString() +
+                '}';
+    }
 }
