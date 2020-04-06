@@ -122,27 +122,22 @@ public class ReportService {
         String response = this.httpClient.get(uriBuilder.build().toString());
         JSONObject obj = (JSONObject) new JSONParser().parse(response);
 
+        System.err.println("response obj -> " + obj.toJSONString());
 
-        JSONObject dataObject = (JSONObject) obj.get("data");
+
+        JSONObject dataObject;
+
+        //System.err.println("dataObject null ? -> " + dataObject==null);
+        //System.err.println("dataObject -> " + dataObject.toJSONString());
+        //System.err.println("dataObject empty ? -> " + dataObject.isEmpty());
+
 
 
         Report resultReport = new Report();
 
-        if(dataObject.isEmpty()){
-            /* in case of error (location unsupported, etc) */
+        try {
+            dataObject = (JSONObject) obj.get("data");
 
-            JSONObject errorObject = (JSONObject) obj.get("error");
-            String code = (String) errorObject.get("code");
-            String title = (String) errorObject.get("title");
-
-            //Error error = new Error(code, title);
-
-            //resultReport.setError(error);
-            resultReport.setLocation(location);
-            resultReport.setDataAvailable(false);
-        }
-
-        else {
             // request timestamp
             String timestampString = (String) ((JSONObject) obj.get("metadata")).get("timestamp");
             LocalDateTime requestTimestamp = LocalDateTime.parse(timestampString.replace("Z", ""));
@@ -176,7 +171,22 @@ public class ReportService {
                     Pollutant pollutant = new Pollutant(symbol, fullName);
 
                     JSONObject concentrationObj = (JSONObject) pollutantData.get("concentration");
-                    double value = (double) concentrationObj.get("value");
+                    System.err.println("con. value -> " + concentrationObj.get("value"));
+                    double value;
+                    // tentar converter para double ou para long, caso não seja possível o cast
+                    // em caso de erro, o value fica -1
+                    try {
+                        value = (double) concentrationObj.get("value");
+                    }
+                    catch (Exception e){
+                        try {
+                            Long longValue = (long) concentrationObj.get("value");
+                            value = longValue.doubleValue();
+                        }
+                        catch (Exception ex){
+                            value = -1;
+                        }
+                    }
                     String units = (String) concentrationObj.get("units");
                     Concentration concentration = new Concentration(value,units);
                     pollutant.setConcentration(concentration);
@@ -191,6 +201,9 @@ public class ReportService {
             }
 
             // Error error = new Error(); // no error
+            resultReport.removeError();
+            resultReport.setErrorCode("NA");
+            resultReport.setErrorTitle("NA");
 
             // setup report
             resultReport.setDataAvailable(dataAvailable);
@@ -200,7 +213,23 @@ public class ReportService {
             resultReport.setLastUpdatedAt(lastUpdate);
             resultReport.setPollutants(pollutants);
             resultReport.setRequestTimeStamp(requestTimestamp);
+        }
 
+        catch (Exception e){
+            /* in case of error (location unsupported, etc) */
+
+            JSONObject errorObject = (JSONObject) obj.get("error");
+            String code = (String) errorObject.get("code");
+            String title = (String) errorObject.get("title");
+
+            //Error error = new Error(code, title);
+
+            //resultReport.setError(error);
+            resultReport.putError();
+            resultReport.setErrorCode(code);
+            resultReport.setErrorTitle(title);
+            resultReport.setLocation(location);
+            resultReport.setDataAvailable(false);
         }
 
         System.err.println(" report a devolver --> " + resultReport.toString());

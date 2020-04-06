@@ -84,6 +84,43 @@ public class Report {
         this.pollutants = pollutants;
     }
 
+
+
+    // ERROR
+    private boolean hasError;
+
+    private String errorCode;
+
+    private String errorTitle;
+
+    public boolean hasError() {
+        return hasError;
+    }
+
+    public void putError() {
+        this.hasError = true;
+    }
+
+    public void removeError(){
+        this.hasError = false;
+    }
+
+    public String getErrorCode() {
+        return errorCode;
+    }
+
+    public void setErrorCode(String errorCode) {
+        this.errorCode = errorCode;
+    }
+
+    public String getErrorTitle() {
+        return errorTitle;
+    }
+
+    public void setErrorTitle(String errorTitle) {
+        this.errorTitle = errorTitle;
+    }
+
     /*public Error getError() {
         return error;
     }
@@ -95,6 +132,14 @@ public class Report {
 
     @Override
     public String toString() {
+        if(hasError){
+            return "Report{" +
+                    "hasError=" + hasError +
+                    ", errorCode=" + errorCode +
+                    ", errorTitle=" +  errorTitle
+                    ;
+        }
+
         return "Report{" +
                 "requestTimeStamp=" + requestTimeStamp +
                 ", lastUpdatedAt=" + lastUpdatedAt +
@@ -104,4 +149,5 @@ public class Report {
                 ", pollutants=" + pollutants.toString() +
                 '}';
     }
+
 }
