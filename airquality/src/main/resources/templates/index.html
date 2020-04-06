@@ -21,54 +21,15 @@
         <div class="container">
 
             <h2>Search for a city or region</h2>
-            <form th:object="${report}" th:action="@{/}" method="get">
+            <form method="get" role="search" action="#" th:action="@{/report}" th:object="${report}">
                 <div class="input-group mb-3">
-                    <input type="text" class="form-control" placeholder="City or region" aria-label="City or region" aria-describedby="basic-addon2" id="locationInput" value="Avelar" th:field="*{location}">
+                    <input type="text" class="form-control" placeholder="City or region" aria-label="City or region" id="location" value="Avelar" th:field="*{location}">
                     <div class="input-group-append">
                         <button type="submit" th:action="@{/}" class="input-group-text badge-danger border-danger" id="basic-addon2"><i class="fas fa-search"></i></button>
                     </div>
                 </div>
 
-                <hr />
 
-                <div th:if="${not #lists.isEmpty(report)}">
-                    <div>
-                        <h3>Air Quality Report</h3>
-                    </div>
-
-                    <div class="card">
-                        <h5 th:text="${'Location: ' + report.address + ' (' + report.countryCode + ')'}" class="card-header">Location</h5>
-                        <div class="card-body">
-                            <div id="performance">
-                                <div class="col-lg-6">
-                                    <h4>Air Quality Index</h4>
-                                    <button id="botaoAQI" class="btn btn-lg" disabled>----</button>
-                                </div>
-                                <div class="col-lg-6">
-                                    <h4>Category</h4>
-                                    <button id="botaoCategory" class="btn btn-lg" disabled>----</button>
-                                </div>
-                            </div>
-
-                            <table>
-                                <tr>
-                                    <th>Url</th>
-                                    <th class="desc">Description</th>
-                                    <th>Done</th>
-                                    <th>Created</th>
-                                </tr>
-                                <th:block th:each="report : ${report}">
-                                    <tr>
-                                        <td ><a th:href="@{${issue.url}}" th:text="${issue.url}"></a></td>
-                                        <td th:text="${issue.description}">...</td>
-                                        <td><span class="status" th:classappend="${issue.done} ? done : pending"></span></td>
-                                        <td th:text="${issue.created}">...</td>
-                                    </tr>
-                                </th:block>
-                            </table>
-                        </div>
-                    </div>
-                </div>
             </form>
 
         </div>

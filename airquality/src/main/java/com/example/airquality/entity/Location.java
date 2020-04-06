@@ -39,11 +39,11 @@ public class Location implements Serializable {
         this.coordinates = coordinates;
     }
 
-    public String getcountryCode() {
+    public String getCountryCode() {
         return countryCode;
     }
 
-    public void setcountryCode(String countryCode) {
+    public void setCountryCode(String countryCode) {
         this.countryCode = countryCode;
     }
 

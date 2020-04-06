@@ -7,6 +7,7 @@ import org.json.simple.parser.ParseException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -25,11 +26,19 @@ public class ReportController {
 
 
     @GetMapping(value = "/")
-    public String backToSearch(Model model, @RequestParam(value = "location", required = false) String location) throws ParseException, IOException, URISyntaxException {
-        Report report = reportService.getReportForInput(location);
-        model.addAttribute("report",report);
+    public String showSearch(Model model){
+        model.addAttribute("report", new Report());
         return "index";
     }
+
+    @GetMapping(value = "/report")
+    public String showReport(Model model, @RequestParam (value = "location") String location) throws ParseException, IOException, URISyntaxException {
+        Report report = reportService.getReportForInput(location);
+        model.addAttribute("report",report);
+        return "report_result";
+    }
+
+
 
 
 
