@@ -13,6 +13,7 @@ import java.util.Optional;
 @Transactional
 public interface ReportRepository extends JpaRepository<Report, Location> {
 
+
     @Override
     List<Report> findAll();
 

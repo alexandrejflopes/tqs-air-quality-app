@@ -3,6 +3,7 @@ package com.example.airquality.entity;
 import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.Objects;
 
 @Embeddable
 public class Location implements Serializable {
@@ -63,5 +64,20 @@ public class Location implements Serializable {
                 ", address='" + address + '\'' +
                 ", coordinates=" + coordinates.toString() +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Location location = (Location) o;
+        return countryCode.equals(location.countryCode) &&
+                address.equals(location.address) &&
+                coordinates.equals(location.coordinates);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(countryCode, address, coordinates);
     }
 }

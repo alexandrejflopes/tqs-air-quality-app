@@ -4,14 +4,13 @@ package com.example.airquality.entity;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 @Entity
 @Table(name = "report")
 public class Report {
 
     @Column
-    private LocalDateTime requestTimeStamp; // timestamp indicating the time the request was made
+    private LocalDateTime requestTimeStamp; // UTC timestamp indicating the time the remote request was made
 
     @Column
     private LocalDateTime lastUpdatedAt; // UTC timestamp indicating the time the data refers to
@@ -85,6 +84,29 @@ public class Report {
     }
 
 
+    // LOCATION CACHE STATS
+    @OneToOne(targetEntity=LocationCacheStats.class, fetch=FetchType.EAGER, cascade = {CascadeType.ALL}, orphanRemoval = true)
+    private LocationCacheStats locationCacheStats;
+
+    public LocationCacheStats getLocationCacheStats() {
+        return locationCacheStats;
+    }
+
+    public void setLocationCacheStats(LocationCacheStats locationCacheStats) {
+        this.locationCacheStats = locationCacheStats;
+    }
+
+    // GLOBAL CACHE STATS
+    @OneToOne(targetEntity=GlobalCacheStats.class, fetch=FetchType.EAGER, cascade = {CascadeType.ALL}, orphanRemoval = true)
+    private GlobalCacheStats globalCacheStats;
+
+    public GlobalCacheStats getGlobalCacheStats() {
+        return globalCacheStats;
+    }
+
+    public void setGlobalCacheStats(GlobalCacheStats globalCacheStats) {
+        this.globalCacheStats = globalCacheStats;
+    }
 
     // ERROR
     private boolean hasError;
