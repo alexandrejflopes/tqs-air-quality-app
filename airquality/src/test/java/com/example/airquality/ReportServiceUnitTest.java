@@ -62,7 +62,7 @@ public class ReportServiceUnitTest {
     }
 
     @Test
-    public void whenNewlyRequestedLocation_thenReportShouldNotBeFound() {
+    public void whenNeverRequestedLocation_thenReportShouldNotBeFound() {
         Location castanheiraDePera = new Location(new Coordinates(40.00405, -8.202775),"PT","Castanheira de Pera e Coentral, Castanheira de Pera");
         Report fromDB = reportService.getReportByLocation(castanheiraDePera);
         verifyFindByIdIsCalledOnce();
@@ -80,7 +80,7 @@ public class ReportServiceUnitTest {
     }
 
     @Test
-    public void whenNewlyRequestedLocation_thenReportShouldNotExist() {
+    public void whenNeverRequestedLocation_thenReportShouldNotExist() {
         Location castanheiraDePera = new Location(new Coordinates(40.00405, -8.202775),"PT","Castanheira de Pera e Coentral, Castanheira de Pera");
         boolean reportExists = reportService.existsReportWithLocation(castanheiraDePera);
         assertThat(reportExists).isEqualTo(false);
@@ -141,7 +141,6 @@ public class ReportServiceUnitTest {
 
         assertThat(fetched).isNull();
     }
-
 
 
     private void verifyFindByIdIsCalledOnce() {
