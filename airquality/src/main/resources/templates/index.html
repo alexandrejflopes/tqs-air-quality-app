@@ -20,12 +20,12 @@
     <main role="main" style="margin-bottom: 100px">
         <div class="container">
 
-            <h2>Search for a city or region</h2>
+            <h2 id="search_prompt_header">Search for a city or region</h2>
             <form method="get" role="search" action="#" th:action="@{/report}" th:object="${report}">
                 <div class="input-group mb-3">
-                    <input type="text" class="form-control" placeholder="City or region" aria-label="City or region" id="location" value="Avelar" th:field="*{location}">
+                    <input type="text" class="form-control" placeholder="City or region" aria-label="City or region" id="location_input" value="Avelar" th:field="*{location}">
                     <div class="input-group-append">
-                        <button type="submit" th:action="@{/}" class="input-group-text badge-danger border-danger" id="basic-addon2"><i class="fas fa-search"></i></button>
+                        <button id="search_button" type="submit" th:action="@{/}" class="input-group-text badge-danger border-danger"><i class="fas fa-search"></i></button>
                     </div>
                 </div>
 

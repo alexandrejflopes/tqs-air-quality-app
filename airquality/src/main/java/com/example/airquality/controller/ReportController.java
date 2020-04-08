@@ -38,6 +38,11 @@ public class ReportController {
         return "report_result";
     }
 
+    @GetMapping(value = "/error")
+    public String showError() {
+        return "error";
+    }
+
 
 
 

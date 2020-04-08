@@ -47,11 +47,9 @@ public class ReportService {
     public Report getReportByLocation(Location location){
         Optional<Report> result = reportRepository.findById(location);
 
-        if(result.isPresent()){
-            return result.get();
-        }
+        return result.orElse(null);
 
-        throw new NoSuchElementException("Could not find report with the provided location.");
+        //throw new NoSuchElementException("Could not find report with the provided location.");
 
     }
 
@@ -93,14 +91,6 @@ public class ReportService {
     }
 
 
-    public boolean statsMapConatainsLocation(Location location){
-        for(Location l : cacheStatsMap.keySet()){
-            if(location.equals(l))
-                return true;
-        }
-
-        return false;
-    }
 
     public Report getReportForInput(String userInput) throws IOException, URISyntaxException, ParseException {
 
@@ -112,6 +102,10 @@ public class ReportService {
         System.err.println();
 
         Location location = requestLocationDataForInput(userInput);
+
+        if(location==null){
+            return null;
+        }
 
         LocationCacheStats locationCacheStats;
 
@@ -132,6 +126,8 @@ public class ReportService {
 
         locationCacheStats.addRequest();
 
+
+
         /*
         * if there's already a cached report for the location, return that
         * report instead of making an unnecessary external API request
@@ -139,6 +135,25 @@ public class ReportService {
         if(existsReportWithLocation(location)){
             System.err.println("There's already a report in cache for " + location.toString());
             Report report = getReportByLocation(location);
+            System.err.println("The report is:");
+            System.err.println(report);
+            System.err.println("-------------------------------------------------------");
+
+
+
+            if(report.hasError()){
+                // if it's a report with error already, do not process it
+                locationCacheStats.addHit();
+                cacheStatsMap.put(location,locationCacheStats); // update location stats
+                localGlobalCacheStats.addHit();
+                globalCacheStats = localGlobalCacheStats; // update global
+                report.setLocationCacheStats(locationCacheStats);
+                report.setGlobalCacheStats(localGlobalCacheStats);
+
+                System.err.println("Hit!");
+                saveReport(report); // update report with new cache stats
+                return report;
+            }
 
 
             ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
@@ -171,6 +186,7 @@ public class ReportService {
                 System.err.println("Old data. Requesting updated data...");
 
                 Report new_report = requestNewReportForLocation(location);
+                System.err.println("updated report -> " + new_report.toString());
 
                 new_report.setLocationCacheStats(locationCacheStats);
                 new_report.setGlobalCacheStats(localGlobalCacheStats);
@@ -180,8 +196,8 @@ public class ReportService {
                 //System.err.println("New lastUpdated: " + new_report.getLastUpdatedAt());
 
                 System.err.println("Miss!");
-                System.err.println("locationCacheStats -> " + locationCacheStats.toString());
-                System.err.println("globalCacheStats -> " + globalCacheStats.toString());
+                //System.err.println("locationCacheStats -> " + locationCacheStats.toString());
+                //System.err.println("globalCacheStats -> " + globalCacheStats.toString());
                 saveReport(new_report);
                 return new_report;
             }
@@ -220,8 +236,8 @@ public class ReportService {
             report.setGlobalCacheStats(localGlobalCacheStats);
 
             System.err.println("Hit!");
-            System.err.println("locationCacheStats -> " + locationCacheStats.toString());
-            System.err.println("globalCacheStats -> " + globalCacheStats.toString());
+            //System.err.println("locationCacheStats -> " + locationCacheStats.toString());
+            //System.err.println("globalCacheStats -> " + globalCacheStats.toString());
             saveReport(report); // update report with new cache stats
             return report;
         }
@@ -238,12 +254,13 @@ public class ReportService {
             cacheStatsMap.put(location, locationCacheStats);
 
             System.err.println("Miss!");
-            System.err.println("locationCacheStats -> " + locationCacheStats.toString());
-            System.err.println("globalCacheStats -> " + globalCacheStats.toString());
+            //System.err.println("locationCacheStats -> " + locationCacheStats.toString());
+            //System.err.println("globalCacheStats -> " + globalCacheStats.toString());
 
             report.setLocationCacheStats(locationCacheStats);
             report.setGlobalCacheStats(localGlobalCacheStats);
             saveReport(report);
+            System.err.println("new report -> " + report.toString());
             return report;
         }
 
@@ -251,6 +268,12 @@ public class ReportService {
 
 
     public Report requestNewReportForLocation(Location location) throws URISyntaxException, IOException, ParseException {
+
+        if(     location==null
+            || (location.getCoordinates()==null || location.getAddress() == null || location.getCountryCode() == null)){
+            return null;
+        }
+
 
         String lat = String.valueOf(location.getCoordinates().getLatitude());
         String lon = String.valueOf(location.getCoordinates().getLongitude());
@@ -298,6 +321,7 @@ public class ReportService {
             // INDEX
             JSONObject indexObject = (JSONObject) ((JSONObject) dataObject.get("indexes")).get("baqi");
             String dominantPollutantName = (String) indexObject.get("dominant_pollutant");
+            //System.err.println("dominantPollutantName from response -> " + dominantPollutantName);
             String displayName = (String) indexObject.get("display_name");
             String valueDisplay = (String) indexObject.get("aqi_display");
             String category = (String) indexObject.get("category");
@@ -310,6 +334,7 @@ public class ReportService {
             Set keys = pollutantsObject.keySet();
 
             List<Pollutant> pollutants = new ArrayList<>();
+
             for (Object key : keys){
                 if(pollutantsObject.get(key) instanceof JSONObject){
                     JSONObject pollutantData = (JSONObject) pollutantsObject.get(key);
@@ -318,7 +343,7 @@ public class ReportService {
                     Pollutant pollutant = new Pollutant(symbol, fullName);
 
                     JSONObject concentrationObj = (JSONObject) pollutantData.get("concentration");
-                    System.err.println("con. value -> " + concentrationObj.get("value"));
+                    //System.err.println("con. value -> " + concentrationObj.get("value"));
                     double value;
                     // tentar converter para double ou para long, caso não seja possível o cast
                     // em caso de erro, o value fica -1
@@ -341,11 +366,15 @@ public class ReportService {
                     pollutants.add(pollutant);
 
                     // check if is this the dominant pollutant
-                    if(symbol.equalsIgnoreCase(dominantPollutantName)){
+                    // remove special characters from symbol in order to compare it to its pollutant name
+                    if(symbol.replace(".","").equalsIgnoreCase(dominantPollutantName)){
+                        //System.err.println("adicionar dominante: " + pollutant.toString());
                         index.setDominantPollutant(pollutant);
                     }
                 }
             }
+
+            //System.err.println("pollutants list -> " + pollutants);
 
             // Error error = new Error(); // no error
             resultReport.removeError();
@@ -395,25 +424,30 @@ public class ReportService {
         String response = this.httpClient.get(uriBuilder.build().toString());
 
 
-        // get parts from response till reaching the address
-        JSONObject obj = (JSONObject) new JSONParser().parse(response);
-        obj =(JSONObject)((JSONArray) obj.get("results")).get(0);
-        JSONObject addressObj =(JSONObject)((JSONArray) obj.get("locations")).get(0);
-        JSONObject coordinates = (JSONObject) addressObj.get("latLng");
+        try {
+            // get parts from response till reaching the address
+            JSONObject obj = (JSONObject) new JSONParser().parse(response);
+            obj =(JSONObject)((JSONArray) obj.get("results")).get(0);
+            JSONObject addressObj =(JSONObject)((JSONArray) obj.get("locations")).get(0);
+            JSONObject coordinates = (JSONObject) addressObj.get("latLng");
 
-        double latitude = (double) coordinates.get("lat");
-        double longitude = (double) coordinates.get("lng");
+            double latitude = (double) coordinates.get("lat");
+            double longitude = (double) coordinates.get("lng");
 
-        String city = (String) addressObj.get("adminArea5");
-        String county = (String) addressObj.get("adminArea4");
-        String address = city + ", " + county;
-        String countryCode = (String) addressObj.get("adminArea1");
+            String city = (String) addressObj.get("adminArea5");
+            String county = (String) addressObj.get("adminArea4");
+            String address = city + ", " + county;
+            String countryCode = (String) addressObj.get("adminArea1");
 
-        Location location = new Location(new Coordinates(latitude,longitude), countryCode, address);
+            Location location = new Location(new Coordinates(latitude,longitude), countryCode, address);
 
-        System.err.println(" location is --> " + location.toString());
+            System.err.println(" location is --> " + location.toString());
 
-        return location;
+            return location;
+        }
+        catch (Exception e){
+            return null;
+        }
 
 
     }

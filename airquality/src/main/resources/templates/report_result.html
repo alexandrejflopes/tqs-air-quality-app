@@ -21,21 +21,21 @@
     <div class="container">
         <form th:action="@{/}" method="get">
             <div class="input-group mb-3">
-                <button type="submit" class="input-group-text badge-info border-info" id="basic-addon2"><i class="fas fa-arrow-left" style="margin-right: 10px"></i>Back to search</button>
+                <button type="submit" class="input-group-text badge-info border-info" id="back_button"><i class="fas fa-arrow-left" style="margin-right: 10px"></i>Back to search</button>
             </div>
 
 
 
             <div>
                 <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                    <strong>Note: </strong>If the report location does not match the place you were looking for,
-                    please specify its location (by entering a district, state, county, etc.) or check if you
+                    <strong>Note: </strong>If the report location does not match the place you are looking for,
+                    please enter a more specific location (by entering a district, state, county, etc.) or check if you
                     wrote the place name correctly. Thanks.
                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div>
+                <div id="reportPageHeader">
                     <h2>Air Quality Report</h2>
                     <hr />
                 </div>
@@ -51,7 +51,7 @@
                     <div class="card-body">
 
                         <!-- aparece caso dataAvailable seja false -->
-                        <div id="errorMessage" th:unless="${report.dataAvailable}" class="alert alert-danger">
+                        <div id="noDataMessage" th:unless="${report.dataAvailable}" class="alert alert-danger">
                             <h5>No data available</h5>
                             <div th:unless="${report.errorTitle==null}">
                                 <h6 th:text="${report.errorTitle}"></h6>
@@ -108,12 +108,12 @@
                         </div>
                     </div>
 
-                    <div class="card-footer">
+                    <div class="card-footer" th:if="${report.dataAvailable}" >
                         <small class="text-muted"
-                               th:text="${'Data fetched remotely at: ' + #strings.arraySplit(report.requestTimeStamp, 'T')[0] + ' | ' + #strings.arraySplit(report.requestTimeStamp, 'T')[1] + '(UTC)'}"></small>
+                               th:text="${'Data fetched remotely at: ' + #strings.arraySplit(report.requestTimeStamp, 'T')[0] + ' | ' + #strings.arraySplit(report.requestTimeStamp, 'T')[1] + ' (UTC)'}"></small>
                         <br>
                         <small class="text-muted"
-                               th:text="${'Last updated at: ' + #strings.arraySplit(report.lastUpdatedAt, 'T')[0] + ' | ' + #strings.arraySplit(report.lastUpdatedAt, 'T')[1] + '(UTC)'}"></small>
+                               th:text="${'Last updated at: ' + #strings.arraySplit(report.lastUpdatedAt, 'T')[0] + ' | ' + #strings.arraySplit(report.lastUpdatedAt, 'T')[1] + ' (UTC)'}"></small>
                     </div>
                 </div>
             </div>

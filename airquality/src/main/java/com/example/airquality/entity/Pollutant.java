@@ -25,6 +25,12 @@ public class Pollutant {
     public Pollutant() {
     }
 
+    public Pollutant(String displayName, String fullName, Concentration concentration) {
+        this.displayName = displayName;
+        this.fullName = fullName;
+        this.concentration = concentration;
+    }
+
     public String getDisplayName() {
         return displayName;
     }
