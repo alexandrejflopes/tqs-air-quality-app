@@ -5,7 +5,6 @@ import com.example.airquality.entity.*;
 import com.example.airquality.repository.ReportRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.internal.verification.VerificationModeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -119,8 +118,8 @@ public class ReportRestControllerIT {
         aveiroReport.setErrorTitle("NA");
 
         // in the first request the report is not cached, so it's a miss
-        aveiroReport.setLocationCacheStats(new LocationCacheStats(0,1,1));
-        aveiroReport.setGlobalCacheStats(new GlobalCacheStats(0,1,1));
+        aveiroReport.setLocationCacheStats(new CacheStats(0,1,1));
+        aveiroReport.setGlobalCacheStats(new CacheStats(0,1,1));
         return aveiroReport;
     }
 

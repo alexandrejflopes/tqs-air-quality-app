@@ -2,7 +2,6 @@ package com.example.airquality.service;
 
 import com.example.airquality.client.ReportHttpClient;
 import com.example.airquality.entity.*;
-import com.example.airquality.entity.LocationCacheStats;
 import com.example.airquality.repository.ReportRepository;
 import org.apache.http.client.utils.URIBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URISyntaxException;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -31,9 +29,9 @@ public class ReportService {
 
     public static final String BREEZOMETER_BASE_URL = "https://api.breezometer.com/air-quality/v2/current-conditions?key=09e19031c4764f0097225dd225826731";
 
-    private GlobalCacheStats globalCacheStats = new GlobalCacheStats();
+    private CacheStats globalCacheStats = new CacheStats();
 
-    private Map<Location, LocationCacheStats> cacheStatsMap = new LinkedHashMap<>();
+    private Map<Location, CacheStats> cacheStatsMap = new LinkedHashMap<>();
 
     private URIBuilder uriBuilder;
     private ReportHttpClient httpClient;
@@ -60,23 +58,17 @@ public class ReportService {
         return reportRepository.save(report);
     }
 
-
     public Report getReportForInput(String userInput) throws IOException, URISyntaxException, ParseException {
-
-        System.err.println("-------------------------------------------------------------");
-        System.err.println("-------------------------------------------------------------");
-
-        System.err.println("location stats map");
-        System.err.println(cacheStatsMap.toString());
-        System.err.println();
 
         Location location = requestLocationDataForInput(userInput);
 
-        if(location==null){
+        boolean invalidLocation = location.getCoordinates()==null || location.getAddress() == null || location.getCountryCode() == null;
+
+        if(invalidLocation){
             return null;
         }
 
-        LocationCacheStats locationCacheStats;
+        CacheStats locationCacheStats;
 
         // a new request to be recorded in global stats
         globalCacheStats.addRequest();
@@ -86,7 +78,7 @@ public class ReportService {
             locationCacheStats = cacheStatsMap.get(location);
         }
         else{
-            locationCacheStats = new LocationCacheStats();
+            locationCacheStats = new CacheStats();
         }
 
         locationCacheStats.addRequest();
@@ -108,7 +100,6 @@ public class ReportService {
                 report.setLocationCacheStats(locationCacheStats);
                 report.setGlobalCacheStats(globalCacheStats);
 
-                System.err.println("Hit!");
                 saveReport(report); // update report with new cache stats
                 return report;
             }
@@ -136,12 +127,12 @@ public class ReportService {
                 cacheStatsMap.put(location,locationCacheStats); // update location stats
                 globalCacheStats.addMiss();
 
-                Report new_report = requestNewReportForLocation(location);
-                new_report.setLocationCacheStats(locationCacheStats);
-                new_report.setGlobalCacheStats(globalCacheStats);
+                Report newReport = requestNewReportForLocation(location);
+                newReport.setLocationCacheStats(locationCacheStats);
+                newReport.setGlobalCacheStats(globalCacheStats);
 
-                saveReport(new_report);
-                return new_report;
+                saveReport(newReport);
+                return newReport;
             }
 
 
@@ -176,8 +167,9 @@ public class ReportService {
 
     public Report requestNewReportForLocation(Location location) throws URISyntaxException, IOException, ParseException {
 
-        if(     location==null
-            || (location.getCoordinates()==null || location.getAddress() == null || location.getCountryCode() == null)){
+        boolean invalidLocation = location.getCoordinates()==null || location.getAddress() == null || location.getCountryCode() == null;
+
+        if(invalidLocation){
             return null;
         }
 
@@ -227,30 +219,16 @@ public class ReportService {
             List<Pollutant> pollutants = new ArrayList<>();
 
             for (Object key : keys){
-                if(pollutantsObject.get(key) instanceof JSONObject){
+                boolean keyIsJsonObject = pollutantsObject.get(key) instanceof JSONObject;
+
+                if(keyIsJsonObject){
                     JSONObject pollutantData = (JSONObject) pollutantsObject.get(key);
                     String symbol = (String) pollutantData.get("display_name");
                     String fullName = (String) pollutantData.get("full_name");
                     Pollutant pollutant = new Pollutant(symbol, fullName);
 
                     JSONObject concentrationObj = (JSONObject) pollutantData.get("concentration");
-                    double value;
-                    /*
-                    * try to convert to double or long if it's not possible to cast;
-                    * if there's error, then the value is -1
-                    * */
-                    try {
-                        value = (double) concentrationObj.get("value");
-                    }
-                    catch (Exception e){
-                        try {
-                            Long longValue = (long) concentrationObj.get("value");
-                            value = longValue.doubleValue();
-                        }
-                        catch (Exception ex){
-                            value = -1;
-                        }
-                    }
+                    double value = extractConcentrationValue(concentrationObj);
                     String units = (String) concentrationObj.get("units");
                     Concentration concentration = new Concentration(value,units);
                     pollutant.setConcentration(concentration);
@@ -320,10 +298,42 @@ public class ReportService {
             return new Location(new Coordinates(latitude,longitude), countryCode, address);
         }
         catch (Exception e){
-            return null;
+            // empty/invalid location
+            return new Location();
         }
 
 
     }
+    
+    public double extractConcentrationValue(JSONObject concentrationObject){
+        double value;
 
+        /*
+         * try to convert to double or long if it's not possible to cast;
+         * if there's error, then the value is -1
+         * */
+        try {
+            value = (double) concentrationObject.get("value");
+        }
+        catch (Exception e){
+            value = convertConcentrationValue(concentrationObject);
+        }
+
+        return value;
+
+    }
+
+    public double convertConcentrationValue(JSONObject concentrationObject){
+        double v;
+
+        try {
+            Long longValue = (long) concentrationObject.get("value");
+            v = longValue.doubleValue();
+        }
+        catch (Exception ex){
+            v = -1;
+        }
+
+        return v;
+    }
 }

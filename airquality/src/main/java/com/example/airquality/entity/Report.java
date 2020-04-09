@@ -31,6 +31,10 @@ public class Report {
 
 
     public Report() {
+        /*
+         * empty constructor to instantiate the report;
+         * all its data will be added using setters as needed
+         * */
     }
 
     public LocalDateTime getRequestTimeStamp() {
@@ -83,26 +87,26 @@ public class Report {
 
 
     // LOCATION CACHE STATS
-    @OneToOne(targetEntity=LocationCacheStats.class, fetch=FetchType.EAGER, cascade = {CascadeType.ALL}, orphanRemoval = true)
-    private LocationCacheStats locationCacheStats;
+    @OneToOne(targetEntity=CacheStats.class, fetch=FetchType.EAGER, cascade = {CascadeType.ALL}, orphanRemoval = true)
+    private CacheStats locationCacheStats;
 
-    public LocationCacheStats getLocationCacheStats() {
+    public CacheStats getLocationCacheStats() {
         return locationCacheStats;
     }
 
-    public void setLocationCacheStats(LocationCacheStats locationCacheStats) {
+    public void setLocationCacheStats(CacheStats locationCacheStats) {
         this.locationCacheStats = locationCacheStats;
     }
 
-    // GLOBAL CACHE STATS
-    @OneToOne(targetEntity=GlobalCacheStats.class, fetch=FetchType.EAGER, cascade = {CascadeType.ALL}, orphanRemoval = true)
-    private GlobalCacheStats globalCacheStats;
+    // CACHE STATS
+    @OneToOne(targetEntity=CacheStats.class, fetch=FetchType.EAGER, cascade = {CascadeType.ALL}, orphanRemoval = true)
+    private CacheStats globalCacheStats;
 
-    public GlobalCacheStats getGlobalCacheStats() {
+    public CacheStats getGlobalCacheStats() {
         return globalCacheStats;
     }
 
-    public void setGlobalCacheStats(GlobalCacheStats globalCacheStats) {
+    public void setGlobalCacheStats(CacheStats globalCacheStats) {
         this.globalCacheStats = globalCacheStats;
     }
 

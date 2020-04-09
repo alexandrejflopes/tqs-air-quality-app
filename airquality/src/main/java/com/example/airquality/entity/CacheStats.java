@@ -7,7 +7,8 @@ import javax.persistence.Id;
 import java.util.Objects;
 
 @Entity
-public class GlobalCacheStats {
+public class CacheStats {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -17,17 +18,18 @@ public class GlobalCacheStats {
     private int misses;
     private int numRequests;
 
-    public GlobalCacheStats(){
+    public CacheStats(){
         this.hits = 0;
         this.misses = 0;
         this.numRequests = 0;
     }
 
-    public GlobalCacheStats(int hits, int misses, int numRequests){
+    public CacheStats(int hits, int misses, int numRequests){
         this.hits = hits;
         this.misses = misses;
         this.numRequests = numRequests;
     }
+
 
     public void addHit(){
         this.hits++;
@@ -73,9 +75,10 @@ public class GlobalCacheStats {
         this.id = id;
     }
 
+
     @Override
     public String toString() {
-        return "GlobalCacheStats{" +
+        return "CacheStats{" +
                 "id=" + id +
                 ", hits=" + hits +
                 ", misses=" + misses +
@@ -83,11 +86,12 @@ public class GlobalCacheStats {
                 '}';
     }
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        GlobalCacheStats that = (GlobalCacheStats) o;
+        CacheStats that = (CacheStats) o;
         return hits == that.hits &&
                 misses == that.misses &&
                 numRequests == that.numRequests &&
