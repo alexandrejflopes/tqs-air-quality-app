@@ -62,7 +62,7 @@ public class ReportService {
 
         Location location = requestLocationDataForInput(userInput);
 
-        boolean invalidLocation = location.getCoordinates()==null || location.getAddress() == null || location.getCountryCode() == null;
+        boolean invalidLocation = location == null || location.getCoordinates()==null || location.getAddress() == null || location.getCountryCode() == null;
 
         if(invalidLocation){
             return null;
@@ -298,13 +298,13 @@ public class ReportService {
             return new Location(new Coordinates(latitude,longitude), countryCode, address);
         }
         catch (Exception e){
-            // empty/invalid location
-            return new Location();
+            // invalid location
+            return null;
         }
 
 
     }
-    
+
     public double extractConcentrationValue(JSONObject concentrationObject){
         double value;
 
@@ -335,5 +335,18 @@ public class ReportService {
         }
 
         return v;
+    }
+
+    public CacheStats getGlobalCacheStats() {
+        return globalCacheStats;
+    }
+
+    public CacheStats getLocationCacheStats(Location location) {
+        try{
+            return cacheStatsMap.get(location);
+        }
+        catch (Exception e){
+            return new CacheStats();
+        }
     }
 }

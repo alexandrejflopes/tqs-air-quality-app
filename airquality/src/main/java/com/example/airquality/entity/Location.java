@@ -21,15 +21,6 @@ public class Location implements Serializable {
         this.address = address;
     }
 
-    public Location(Coordinates coordinates, String countryCode) {
-        this.coordinates = coordinates;
-        this.countryCode = countryCode;
-    }
-
-    public Location(Coordinates coordinates) {
-        this.coordinates = coordinates;
-    }
-
     public Location() {}
 
     public Coordinates getCoordinates() {
@@ -59,11 +50,23 @@ public class Location implements Serializable {
 
     @Override
     public String toString() {
-        return "Location{" +
-                "countryCode='" + countryCode + '\'' +
-                ", address='" + address + '\'' +
-                ", coordinates=" + coordinates.toString() +
-                '}';
+        // return Strings depending on validity of this Location
+        try{
+            return "Location{" +
+                    "countryCode='" + countryCode + '\'' +
+                    ", address='" + address + '\'' +
+                    ", coordinates=" + coordinates.toString() +
+                    '}';
+        }
+        catch (Exception e){
+            return "Location{" +
+                    "countryCode='" + countryCode + '\'' +
+                    ", address='" + address + '\'' +
+                    ", coordinates= 'null'"  +
+                    '}';
+        }
+
+
     }
 
     @Override

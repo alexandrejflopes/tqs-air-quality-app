@@ -51,6 +51,8 @@ public class ReportServiceUnitTest {
         Mockito.when(reportRepository.findById(castanheiraDePera)).thenReturn(Optional.empty());
     }
 
+
+
     @Test
     public void whenPreviouslyRequestedLocation_thenReportShouldBeFound() {
         Location aveiro = new Location(new Coordinates(40.640496, -8.653784), "PT","Aveiro, Aveiro");
@@ -87,7 +89,7 @@ public class ReportServiceUnitTest {
     }
 
     @Test
-    public void whenValidInput_thenLocationShouldBeFetched() throws ParseException, IOException, URISyntaxException {
+    public void whenValidInput_thenLocationShouldBeFetched() throws IOException, URISyntaxException {
         String location_input = "Aveiro";
         Location fetched = reportService.requestLocationDataForInput(location_input);
 
@@ -99,10 +101,11 @@ public class ReportServiceUnitTest {
     }
 
     @Test
-    public void whenInvalidInput_thenLocationShouldNotBeFetched() throws ParseException, IOException, URISyntaxException {
+    public void whenInvalidInput_thenLocationShouldNotBeFetched() throws IOException, URISyntaxException {
         String location_input = " ";
         Location fetched = reportService.requestLocationDataForInput(location_input);
 
+        //
         assertThat(fetched).isNull();
     }
 
@@ -141,8 +144,83 @@ public class ReportServiceUnitTest {
     }
 
 
+    // cache statistics tests
+
+    @Test
+    public void whenNewRequest_thenNumberOfRequestsShouldIncrementByOne() throws ParseException, IOException, URISyntaxException {
+        String location_input = "Aveiro";
+        // initial number of requests
+        double numGlobalRequestsBefore = reportService.getGlobalCacheStats().getNumRequests();
+        double numLocalRequestsBefore = 0;
+
+        // perform one request
+        Report fromDB1 = reportService.getReportForInput(location_input);
+
+        double numGlobalRequestsAfter = reportService.getGlobalCacheStats().getNumRequests();
+        double numLocalRequestsAfter = reportService.getLocationCacheStats(fromDB1.getLocation()).getNumRequests();
+        verifyFindByIdIsCalledOnce(); // service must check if the report is cached first
+
+        assertThat(numGlobalRequestsAfter).isEqualTo(numGlobalRequestsBefore+1);
+        assertThat(numLocalRequestsAfter).isEqualTo(numLocalRequestsBefore+1);
+    }
+
+    @Test
+    public void whenNeverRequestedLocation_thenNumberOfMissesShouldIncrementByOne() throws ParseException, IOException, URISyntaxException {
+        String location_input = "Aveiro";
+
+        // initial number of requests
+        double numGlobalMissesBefore = reportService.getGlobalCacheStats().getMisses();
+        double numLocalMissesBefore = 0;
+
+        // perform one request
+        Report fromDB1 = reportService.getReportForInput(location_input);
+
+        double numGlobalMissesAfter = reportService.getGlobalCacheStats().getMisses();
+        double numLocalMissesAfter = reportService.getLocationCacheStats(fromDB1.getLocation()).getMisses();
+        verifyFindByIdIsCalledOnce(); // service must check if the report is cached first
+
+        assertThat(numGlobalMissesAfter).isEqualTo(numGlobalMissesBefore+1);
+        assertThat(numLocalMissesAfter).isEqualTo(numLocalMissesBefore+1);
+    }
+
+    // TODO: failing test
+    /*
+    @Test
+    public void whenPrevouslyRequestedLocation_thenNumberOfHitsShouldIncrementByOne() throws ParseException, IOException, URISyntaxException {
+        String location_input = "Aveiro";
+        Location aveiro = new Location(new Coordinates(40.640496, -8.653784), "PT","Aveiro, Aveiro");
+
+        // initial number of hits for this location
+        double numGlobalHitsBefore = reportService.getGlobalCacheStats().getHits();
+        double numLocalHitsBefore = 0;
+
+        Report fromDB1 = reportService.getReportForInput(location_input);
+        Report fromDB2 = reportService.getReportForInput(location_input);
+
+        System.err.println("fromDB1");
+        System.err.println(fromDB1);
+        System.err.println("------------------------");
+        System.err.println("fromDB2");
+        System.err.println(fromDB2);
+
+        assertThat(fromDB1.getLocation()).isEqualTo(fromDB2.getLocation()).isEqualTo(aveiro);
+
+        double numGlobalHitsAfter = reportService.getGlobalCacheStats().getHits();
+        double numLocalHitsAfter = reportService.getLocationCacheStats(aveiro).getHits();
+        verifyFindByIdIsCalledTwice(); // service must check if the report is cached first
+
+        assertThat(numGlobalHitsAfter).isEqualTo(numGlobalHitsBefore+1);
+        assertThat(numLocalHitsAfter).isEqualTo(numLocalHitsBefore+1);
+    }*/
+
+
     private void verifyFindByIdIsCalledOnce() {
         Mockito.verify(reportRepository, VerificationModeFactory.times(1)).findById(Mockito.any(Location.class));
+        Mockito.reset(reportRepository);
+    }
+
+    private void verifyFindByIdIsCalledTwice() {
+        Mockito.verify(reportRepository, VerificationModeFactory.times(2)).findById(Mockito.any(Location.class));
         Mockito.reset(reportRepository);
     }
 

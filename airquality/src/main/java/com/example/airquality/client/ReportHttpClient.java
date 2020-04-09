@@ -15,9 +15,9 @@ public class ReportHttpClient implements TqsHttpClient {
     public String get(String url) throws IOException {
         CloseableHttpClient client = HttpClients.createDefault();
         HttpGet request = new HttpGet(url);
-        CloseableHttpResponse response = null;
+        CloseableHttpResponse response = client.execute(request);
+
         try {
-            response = client.execute(request);
             HttpEntity entity = response.getEntity();
             return EntityUtils.toString(entity);
         } finally {

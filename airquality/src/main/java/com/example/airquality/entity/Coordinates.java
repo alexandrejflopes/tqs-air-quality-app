@@ -20,7 +20,8 @@ public class Coordinates implements Serializable {
         this.longitude = longitude;
     }
 
-    public Coordinates() {}
+    public Coordinates() {
+    }
 
     public double getLatitude() {
         return latitude;
