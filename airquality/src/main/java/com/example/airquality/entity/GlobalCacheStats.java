@@ -4,6 +4,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import java.util.Objects;
 
 @Entity
 public class GlobalCacheStats {
@@ -20,6 +21,12 @@ public class GlobalCacheStats {
         this.hits = 0;
         this.misses = 0;
         this.numRequests = 0;
+    }
+
+    public GlobalCacheStats(int hits, int misses, int numRequests){
+        this.hits = hits;
+        this.misses = misses;
+        this.numRequests = numRequests;
     }
 
     public void addHit(){
@@ -58,6 +65,14 @@ public class GlobalCacheStats {
         this.numRequests = numRequests;
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     @Override
     public String toString() {
         return "GlobalCacheStats{" +
@@ -66,5 +81,21 @@ public class GlobalCacheStats {
                 ", misses=" + misses +
                 ", numRequests=" + numRequests +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        GlobalCacheStats that = (GlobalCacheStats) o;
+        return hits == that.hits &&
+                misses == that.misses &&
+                numRequests == that.numRequests &&
+                Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, hits, misses, numRequests);
     }
 }

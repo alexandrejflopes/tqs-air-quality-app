@@ -1,6 +1,7 @@
 package com.example.airquality.entity;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 public class Index {
@@ -73,5 +74,22 @@ public class Index {
                 ", category='" + category + '\'' +
                 ", dominantPollutant=" + dominantPollutant.toString() +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Index index = (Index) o;
+        return Objects.equals(id, index.id) &&
+                Objects.equals(name, index.name) &&
+                Objects.equals(valueDisplay, index.valueDisplay) &&
+                Objects.equals(category, index.category) &&
+                Objects.equals(dominantPollutant, index.dominantPollutant);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, valueDisplay, category, dominantPollutant);
     }
 }

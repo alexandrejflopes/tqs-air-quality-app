@@ -23,4 +23,5 @@ public interface ReportRepository extends JpaRepository<Report, Location> {
     @Override
     boolean existsById(Location location);
 
+
 }

@@ -21,9 +21,9 @@ public class ReportRestController {
     @Autowired
     ReportService reportService;
 
-    //@GetMapping(path="/employees", produces = "application/json")
+    //@GetMapping(path="/location/{location}", produces = "application/json")
     @GetMapping("/location/{location}")
-    public Report getReportForLocation(@PathVariable(name = "location", required = true) String location) throws ParseException, IOException, URISyntaxException {
+    public Report getReportForLocation(@PathVariable(name = "location") String location) throws ParseException, IOException, URISyntaxException {
         reportService.setHttpClient(new ReportHttpClient());
         return reportService.getReportForInput(location);
     }

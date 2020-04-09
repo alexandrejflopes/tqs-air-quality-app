@@ -27,7 +27,9 @@ import java.io.IOException;
 @Transactional
 public class ReportService {
 
-    private static final int TTL = 1;
+    public static final String GEOCODING_BASE_URL = "http://open.mapquestapi.com/geocoding/v1/address?key=zB8zqDRHU5QIZxabKtiTQGSoHeOMXNeK";
+
+    public static final String BREEZOMETER_BASE_URL = "https://api.breezometer.com/air-quality/v2/current-conditions?key=09e19031c4764f0097225dd225826731";
 
     private GlobalCacheStats globalCacheStats = new GlobalCacheStats();
 
@@ -48,48 +50,15 @@ public class ReportService {
         Optional<Report> result = reportRepository.findById(location);
 
         return result.orElse(null);
-
-        //throw new NoSuchElementException("Could not find report with the provided location.");
-
-    }
-
-
-    public Report getReportByCoordiantes(Coordinates coordinates){
-
-        List<Report> allReports = reportRepository.findAll();
-
-        for(Report r : allReports){
-            if(r.getLocation().getCoordinates().equals(coordinates)){
-                return r;
-            }
-        }
-
-        return null;
     }
 
     public boolean existsReportWithLocation(Location location){
         return reportRepository.existsById(location);
     }
 
-    public boolean existsReportWithCoordinates(Coordinates coordinates){
-        List<Report> allReports = reportRepository.findAll();
-
-        boolean exists = false;
-
-        for(Report r : allReports){
-            if(r.getLocation().getCoordinates().equals(coordinates)){
-                exists = true;
-                break;
-            }
-        }
-
-        return exists;
-    }
-
     public Report saveReport(Report report){
         return reportRepository.save(report);
     }
-
 
 
     public Report getReportForInput(String userInput) throws IOException, URISyntaxException, ParseException {
@@ -110,17 +79,13 @@ public class ReportService {
         LocationCacheStats locationCacheStats;
 
         // a new request to be recorded in global stats
-        GlobalCacheStats localGlobalCacheStats = globalCacheStats;
-
-        localGlobalCacheStats.addRequest();
+        globalCacheStats.addRequest();
 
         // get cache data for this location, if exists and count request
         if(cacheStatsMap.containsKey(location)){
-            System.err.println("already got a location stats for that place");
             locationCacheStats = cacheStatsMap.get(location);
         }
         else{
-            System.err.println("initialize new location stats for that place");
             locationCacheStats = new LocationCacheStats();
         }
 
@@ -133,22 +98,15 @@ public class ReportService {
         * report instead of making an unnecessary external API request
         * */
         if(existsReportWithLocation(location)){
-            System.err.println("There's already a report in cache for " + location.toString());
             Report report = getReportByLocation(location);
-            System.err.println("The report is:");
-            System.err.println(report);
-            System.err.println("-------------------------------------------------------");
-
-
 
             if(report.hasError()){
                 // if it's a report with error already, do not process it
                 locationCacheStats.addHit();
                 cacheStatsMap.put(location,locationCacheStats); // update location stats
-                localGlobalCacheStats.addHit();
-                globalCacheStats = localGlobalCacheStats; // update global
+                globalCacheStats.addHit();
                 report.setLocationCacheStats(locationCacheStats);
-                report.setGlobalCacheStats(localGlobalCacheStats);
+                report.setGlobalCacheStats(globalCacheStats);
 
                 System.err.println("Hit!");
                 saveReport(report); // update report with new cache stats
@@ -159,15 +117,11 @@ public class ReportService {
             ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
             LocalDateTime lastRequestTimeStamp = report.getRequestTimeStamp();
 
-            //System.err.println("lastRequestTimeStamp LDT: " + lastRequestTimeStamp.toString());
-            //System.err.println("lastRequestTimeStamp ZT: " + ZonedDateTime.of(lastRequestTimeStamp, ZoneId.of("UTC")).toString());
-
             boolean differentHourOrDay = (now.getHour() != lastRequestTimeStamp.getHour()) ||
                                         (   now.getDayOfMonth()!=lastRequestTimeStamp.getDayOfMonth() ||
                                             now.getMonthValue()!=lastRequestTimeStamp.getMonthValue() ||
                                             now.getYear()!=lastRequestTimeStamp.getYear()
                                         );
-
 
             if(differentHourOrDay){
                 /*
@@ -180,64 +134,24 @@ public class ReportService {
                 // a new request means a miss in the cache
                 locationCacheStats.addMiss();
                 cacheStatsMap.put(location,locationCacheStats); // update location stats
-                localGlobalCacheStats.addMiss();
-                globalCacheStats = localGlobalCacheStats; // update global
-
-                System.err.println("Old data. Requesting updated data...");
+                globalCacheStats.addMiss();
 
                 Report new_report = requestNewReportForLocation(location);
-                System.err.println("updated report -> " + new_report.toString());
-
                 new_report.setLocationCacheStats(locationCacheStats);
-                new_report.setGlobalCacheStats(localGlobalCacheStats);
-                //System.err.println("Old reqTS: " + report.getRequestTimeStamp());
-                //System.err.println("New reqTS: " + new_report.getRequestTimeStamp());
-                //System.err.println("Old lastUpdated: " + report.getLastUpdatedAt());
-                //System.err.println("New lastUpdated: " + new_report.getLastUpdatedAt());
+                new_report.setGlobalCacheStats(globalCacheStats);
 
-                System.err.println("Miss!");
-                //System.err.println("locationCacheStats -> " + locationCacheStats.toString());
-                //System.err.println("globalCacheStats -> " + globalCacheStats.toString());
                 saveReport(new_report);
                 return new_report;
             }
 
-            Duration duration = Duration.between(lastRequestTimeStamp, now);
 
-            //System.err.println("now hour -> " + now.getHour());
-            //System.err.println("reqTS hour -> " + lastRequestTimeStamp.getHour());
-
-            //System.err.println("duration minutes -> " + duration.toMinutes());
-
-            // implementation with a fixed TTL
-            /*
-            if(duration.toMinutes() >= TTL){
-                // if the cached data was fetched TTL minutes ago, request new data
-
-                System.err.println("Reached TTL. Requesting updated data...");
-
-                Report new_report = requestNewReportForLocation(location);
-                System.err.println("Old reqTS: " + report.getRequestTimeStamp());
-                System.err.println("New reqTS: " + new_report.getRequestTimeStamp());
-                System.err.println("Old lastUpdated: " + report.getLastUpdatedAt());
-                System.err.println("New lastUpdated: " + new_report.getLastUpdatedAt());
-                saveReport(new_report);
-                return new_report;
-            }
-            */
-
-            System.err.println("Found the report in cache");
             // if a new request is not made, add a hit in the cache
             locationCacheStats.addHit();
             cacheStatsMap.put(location,locationCacheStats); // update location stats
-            localGlobalCacheStats.addHit();
-            globalCacheStats = localGlobalCacheStats; // update global
+            globalCacheStats.addHit();
             report.setLocationCacheStats(locationCacheStats);
-            report.setGlobalCacheStats(localGlobalCacheStats);
+            report.setGlobalCacheStats(globalCacheStats);
 
-            System.err.println("Hit!");
-            //System.err.println("locationCacheStats -> " + locationCacheStats.toString());
-            //System.err.println("globalCacheStats -> " + globalCacheStats.toString());
             saveReport(report); // update report with new cache stats
             return report;
         }
@@ -249,23 +163,16 @@ public class ReportService {
             * */
             Report report = requestNewReportForLocation(location);
             locationCacheStats.addMiss();
-            localGlobalCacheStats.addMiss();
-            globalCacheStats = localGlobalCacheStats; // update global
+            globalCacheStats.addMiss();
             cacheStatsMap.put(location, locationCacheStats);
 
-            System.err.println("Miss!");
-            //System.err.println("locationCacheStats -> " + locationCacheStats.toString());
-            //System.err.println("globalCacheStats -> " + globalCacheStats.toString());
-
             report.setLocationCacheStats(locationCacheStats);
-            report.setGlobalCacheStats(localGlobalCacheStats);
+            report.setGlobalCacheStats(globalCacheStats);
             saveReport(report);
-            System.err.println("new report -> " + report.toString());
             return report;
         }
 
     }
-
 
     public Report requestNewReportForLocation(Location location) throws URISyntaxException, IOException, ParseException {
 
@@ -274,34 +181,19 @@ public class ReportService {
             return null;
         }
 
-
         String lat = String.valueOf(location.getCoordinates().getLatitude());
         String lon = String.valueOf(location.getCoordinates().getLongitude());
 
-        //System.err.println(" lat is --> " + lat);
-        //System.err.println(" lon is --> " + lon);
-
-        uriBuilder = new URIBuilder("https://api.breezometer.com/air-quality/v2/current-conditions?key=09e19031c4764f0097225dd225826731");
+        uriBuilder = new URIBuilder(BREEZOMETER_BASE_URL);
         uriBuilder.addParameter("lat", lat );
         uriBuilder.addParameter("lon", lon );
         uriBuilder.addParameter("features", "breezometer_aqi,local_aqi,health_recommendations,sources_and_effects,dominant_pollutant_concentrations,pollutants_concentrations,pollutants_aqi_information");
         uriBuilder.addParameter("metadata", "true");
 
-        //System.err.println(" url is --> " + uriBuilder.build().toString());
-
         String response = this.httpClient.get(uriBuilder.build().toString());
         JSONObject obj = (JSONObject) new JSONParser().parse(response);
 
-        //System.err.println("response obj -> " + obj.toJSONString());
-
-
         JSONObject dataObject;
-
-        //System.err.println("dataObject null ? -> " + dataObject==null);
-        //System.err.println("dataObject -> " + dataObject.toJSONString());
-        //System.err.println("dataObject empty ? -> " + dataObject.isEmpty());
-
-
 
         Report resultReport = new Report();
 
@@ -321,7 +213,6 @@ public class ReportService {
             // INDEX
             JSONObject indexObject = (JSONObject) ((JSONObject) dataObject.get("indexes")).get("baqi");
             String dominantPollutantName = (String) indexObject.get("dominant_pollutant");
-            //System.err.println("dominantPollutantName from response -> " + dominantPollutantName);
             String displayName = (String) indexObject.get("display_name");
             String valueDisplay = (String) indexObject.get("aqi_display");
             String category = (String) indexObject.get("category");
@@ -343,10 +234,11 @@ public class ReportService {
                     Pollutant pollutant = new Pollutant(symbol, fullName);
 
                     JSONObject concentrationObj = (JSONObject) pollutantData.get("concentration");
-                    //System.err.println("con. value -> " + concentrationObj.get("value"));
                     double value;
-                    // tentar converter para double ou para long, caso não seja possível o cast
-                    // em caso de erro, o value fica -1
+                    /*
+                    * try to convert to double or long if it's not possible to cast;
+                    * if there's error, then the value is -1
+                    * */
                     try {
                         value = (double) concentrationObj.get("value");
                     }
@@ -368,15 +260,11 @@ public class ReportService {
                     // check if is this the dominant pollutant
                     // remove special characters from symbol in order to compare it to its pollutant name
                     if(symbol.replace(".","").equalsIgnoreCase(dominantPollutantName)){
-                        //System.err.println("adicionar dominante: " + pollutant.toString());
                         index.setDominantPollutant(pollutant);
                     }
                 }
             }
 
-            //System.err.println("pollutants list -> " + pollutants);
-
-            // Error error = new Error(); // no error
             resultReport.removeError();
             resultReport.setErrorCode("NA");
             resultReport.setErrorTitle("NA");
@@ -384,7 +272,6 @@ public class ReportService {
             // setup report
             resultReport.setDataAvailable(dataAvailable);
             resultReport.setLocation(location);
-            //resultReport.setError(error);
             resultReport.setIndex(index);
             resultReport.setLastUpdatedAt(lastUpdate);
             resultReport.setPollutants(pollutants);
@@ -398,9 +285,6 @@ public class ReportService {
             String code = (String) errorObject.get("code");
             String title = (String) errorObject.get("title");
 
-            //Error error = new Error(code, title);
-
-            //resultReport.setError(error);
             resultReport.putError();
             resultReport.setErrorCode(code);
             resultReport.setErrorTitle(title);
@@ -408,24 +292,18 @@ public class ReportService {
             resultReport.setDataAvailable(false);
         }
 
-        //System.err.println(" report a devolver --> " + resultReport.toString());
-
         return resultReport;
 
     }
 
-    public Location requestLocationDataForInput(String locationInput) throws URISyntaxException, IOException, ParseException {
+    public Location requestLocationDataForInput(String locationInput) throws URISyntaxException, IOException {
 
-        uriBuilder = new URIBuilder("http://open.mapquestapi.com/geocoding/v1/address?key=zB8zqDRHU5QIZxabKtiTQGSoHeOMXNeK");
+        uriBuilder = new URIBuilder(GEOCODING_BASE_URL);
         uriBuilder.addParameter("location", locationInput );
-
-        //System.err.println(" url is --> " + uriBuilder.build().toString());
 
         String response = this.httpClient.get(uriBuilder.build().toString());
 
-
         try {
-            // get parts from response till reaching the address
             JSONObject obj = (JSONObject) new JSONParser().parse(response);
             obj =(JSONObject)((JSONArray) obj.get("results")).get(0);
             JSONObject addressObj =(JSONObject)((JSONArray) obj.get("locations")).get(0);
@@ -436,51 +314,15 @@ public class ReportService {
 
             String city = (String) addressObj.get("adminArea5");
             String county = (String) addressObj.get("adminArea4");
-            String address = city + ", " + county;
+            String address = city.isEmpty() ? county : city + ", " + county;
             String countryCode = (String) addressObj.get("adminArea1");
 
-            Location location = new Location(new Coordinates(latitude,longitude), countryCode, address);
-
-            System.err.println(" location is --> " + location.toString());
-
-            return location;
+            return new Location(new Coordinates(latitude,longitude), countryCode, address);
         }
         catch (Exception e){
             return null;
         }
 
-
-    }
-
-
-    // deprecated
-    public Coordinates getCoordinatesFromResponse(String response) throws ParseException {
-
-        // get parts from response till reaching the address
-        JSONObject obj = (JSONObject) new JSONParser().parse(response);
-        obj =(JSONObject)((JSONArray) obj.get("results")).get(0);
-        JSONObject address =(JSONObject)((JSONArray) obj.get("locations")).get(0);
-        JSONObject coordinates = (JSONObject) address.get("latLng");
-
-        double latitude = (double) coordinates.get("lat");
-        double longitude = (double) coordinates.get("lng");
-
-        return new Coordinates(latitude, longitude);
-
-    }
-
-    // deprecated
-    public String getAddressFromResponse(String response) throws ParseException {
-
-        // get parts from response till reaching the address
-        JSONObject obj = (JSONObject) new JSONParser().parse(response);
-        obj =(JSONObject)((JSONArray) obj.get("results")).get(0);
-        JSONObject address =(JSONObject)((JSONArray) obj.get("locations")).get(0);
-
-        String city = (String) address.get("adminArea5");
-        String county = (String) address.get("adminArea4");
-
-        return city + ", " + county;
 
     }
 

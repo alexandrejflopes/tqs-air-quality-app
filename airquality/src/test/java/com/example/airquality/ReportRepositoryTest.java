@@ -79,6 +79,10 @@ public class ReportRepositoryTest {
         aveiroReport.setErrorCode("NA");
         aveiroReport.setErrorTitle("NA");
 
+
+        // in the first request the report is not cached, so it's a miss
+        aveiroReport.setLocationCacheStats(new LocationCacheStats(0,1,1));
+        aveiroReport.setGlobalCacheStats(new GlobalCacheStats(0,1,1));
         return aveiroReport;
     }
 

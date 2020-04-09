@@ -4,6 +4,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import java.util.Objects;
 
 @Entity
 public class Concentration {
@@ -45,5 +46,20 @@ public class Concentration {
                 ", value=" + value +
                 ", units='" + units + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Concentration that = (Concentration) o;
+        return Double.compare(that.value, value) == 0 &&
+                Objects.equals(id, that.id) &&
+                Objects.equals(units, that.units);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, value, units);
     }
 }

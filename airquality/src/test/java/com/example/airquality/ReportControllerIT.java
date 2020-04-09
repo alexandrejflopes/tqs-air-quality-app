@@ -16,7 +16,6 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.CoreMatchers.is;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.reset;
@@ -24,9 +23,7 @@ import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ReportRestController.class)
 public class ReportControllerIT {
@@ -43,7 +40,7 @@ public class ReportControllerIT {
 
 
     @Test
-    public void givenSupportedLocationName_whenGetReportForThatLocation_thenReturnJson() throws Exception {
+    public void givenLocationName_whenGetReportForThatLocation_thenReturnJson() throws Exception {
         Report aveiroReport = setUpAveiroReport();
         String location_input = "Aveiro";
 
@@ -57,38 +54,6 @@ public class ReportControllerIT {
                 .andExpect(jsonPath("$.location.coordinates.longitude", is(aveiroReport.getLocation().getCoordinates().getLongitude())))
                 .andExpect(jsonPath("$.errorCode", is(aveiroReport.getErrorCode())))
                 .andExpect(jsonPath("$.errorTitle", is(aveiroReport.getErrorTitle())));
-        verify(reportService, VerificationModeFactory.times(1)).getReportForInput(location_input);
-        reset(reportService);
-    }
-
-    @Test
-    public void givenUnsupportedLocationName_whenGetReportForThatLocation_thenReturnJson() throws Exception {
-        Report antarcticaReport = setUpAntarcticaReport();
-        String location_input = "Antarctica";
-
-        given(reportService.getReportForInput(location_input)).willReturn(antarcticaReport);
-
-        mvc.perform(get("/api/location/"+location_input).contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.location.countryCode", is(antarcticaReport.getLocation().getCountryCode())))
-                .andExpect(jsonPath("$.location.address", is(antarcticaReport.getLocation().getAddress())))
-                .andExpect(jsonPath("$.location.coordinates.latitude", is(antarcticaReport.getLocation().getCoordinates().getLatitude())))
-                .andExpect(jsonPath("$.location.coordinates.longitude", is(antarcticaReport.getLocation().getCoordinates().getLongitude())))
-                .andExpect(jsonPath("$.errorCode", is(antarcticaReport.getErrorCode())))
-                .andExpect(jsonPath("$.errorTitle", is(antarcticaReport.getErrorTitle())));
-        verify(reportService, VerificationModeFactory.times(1)).getReportForInput(location_input);
-        reset(reportService);
-    }
-
-    // TODO: verficar o que se passa
-    @Test
-    public void givenInvalidLocationName_whenGetReportForThatLocation_thenReturnJson() throws Exception {
-        String location_input = " ";
-
-        given(reportService.getReportForInput(location_input)).willReturn(null);
-
-        mvc.perform(get("/api/location/"+location_input).contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
         verify(reportService, VerificationModeFactory.times(1)).getReportForInput(location_input);
         reset(reportService);
     }
@@ -117,21 +82,11 @@ public class ReportControllerIT {
         aveiroReport.setErrorCode("NA");
         aveiroReport.setErrorTitle("NA");
 
+        // in the first request the report is not cached, so it's a miss
+        aveiroReport.setLocationCacheStats(new LocationCacheStats(0,1,1));
+        aveiroReport.setGlobalCacheStats(new GlobalCacheStats(0,1,1));
         return aveiroReport;
     }
 
 
-    public Report setUpAntarcticaReport(){
-        Location antarctica = new Location(new Coordinates(-82.108182, 34.37824), "AQ",", ");
-
-        Report antarcticaReport = new Report();
-        antarcticaReport.setLocation(antarctica);
-        antarcticaReport.setDataAvailable(false);
-
-        antarcticaReport.removeError();
-        antarcticaReport.setErrorCode("location_unsupported");
-        antarcticaReport.setErrorTitle("Location Specified Is Unsupported");
-
-        return antarcticaReport;
-    }
 }

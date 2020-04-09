@@ -2,6 +2,7 @@ package com.example.airquality.entity;
 
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 public class Pollutant {
@@ -62,5 +63,21 @@ public class Pollutant {
                 ", fullName='" + fullName + '\'' +
                 ", concentration=" + concentration.toString() +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Pollutant pollutant = (Pollutant) o;
+        return Objects.equals(id, pollutant.id) &&
+                Objects.equals(displayName, pollutant.displayName) &&
+                Objects.equals(fullName, pollutant.fullName) &&
+                Objects.equals(concentration, pollutant.concentration);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, displayName, fullName, concentration);
     }
 }

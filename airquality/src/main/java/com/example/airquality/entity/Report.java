@@ -4,6 +4,7 @@ package com.example.airquality.entity;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "report")
@@ -25,11 +26,8 @@ public class Report {
 
 
     @Column
-    @ManyToMany(cascade = {CascadeType.ALL})
+    @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.ALL})
     private List<Pollutant> pollutants;
-
-    //@OneToOne(targetEntity=Error.class, fetch=FetchType.EAGER)
-    //private Error error;
 
 
     public Report() {
@@ -143,13 +141,6 @@ public class Report {
         this.errorTitle = errorTitle;
     }
 
-    /*public Error getError() {
-        return error;
-    }
-
-    public void setError(Error error) {
-        this.error = error;
-    }*/
 
 
     @Override
@@ -169,7 +160,35 @@ public class Report {
                 ", dataAvailable=" + dataAvailable +
                 ", index=" + index.toString() +
                 ", pollutants=" + pollutants.toString() +
+                ", hasError=" + hasError +
+                ", errorCode=" + errorCode +
+                ", errorTitle=" +  errorTitle +
+                ", locationCacheStats=" + locationCacheStats.toString() +
+                ", globalCacheStats=" + globalCacheStats.toString() +
                 '}';
     }
 
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Report report = (Report) o;
+        return dataAvailable == report.dataAvailable &&
+                hasError == report.hasError &&
+                Objects.equals(requestTimeStamp, report.requestTimeStamp) &&
+                Objects.equals(lastUpdatedAt, report.lastUpdatedAt) &&
+                Objects.equals(location, report.location) &&
+                Objects.equals(index, report.index) &&
+                Objects.equals(pollutants, report.pollutants) &&
+                Objects.equals(locationCacheStats, report.locationCacheStats) &&
+                Objects.equals(globalCacheStats, report.globalCacheStats) &&
+                Objects.equals(errorCode, report.errorCode) &&
+                Objects.equals(errorTitle, report.errorTitle);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(requestTimeStamp, lastUpdatedAt, location, dataAvailable, index, pollutants, locationCacheStats, globalCacheStats, hasError, errorCode, errorTitle);
+    }
 }
