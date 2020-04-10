@@ -36,6 +36,7 @@ public class ReportRestControllerTemplateIT {
 
     @AfterEach
     public void resetDb() {
+        //System.err.println("--------- reset ----------");
         reportRepository.deleteAll();
     }
 
@@ -82,15 +83,7 @@ public class ReportRestControllerTemplateIT {
         Optional<Report> responseBody = response.getBody();
 
         assertThat(responseBody.isPresent()).isEqualTo(true);
-        /*
-         * as ids, timestamps and index and pollutants metrics change
-         * depending on the moment of request, we need to sync
-         * those in the testing report with the one obtained from DB
-         * in order to have a 'fair' comparison;
-         * if all went right, all the rest should be the same
-         * */
-        aveiroReport = updateMetrics(aveiroReport, responseBody.get());
-        assertThat(responseBody.get()).isEqualTo(aveiroReport);
+        assertThat(responseBody.get().getLocation()).isEqualTo(aveiroReport.getLocation());
     }
 
     @Test

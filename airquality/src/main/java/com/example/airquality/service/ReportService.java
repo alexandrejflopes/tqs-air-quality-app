@@ -342,11 +342,8 @@ public class ReportService {
     }
 
     public CacheStats getLocationCacheStats(Location location) {
-        try{
+        if(cacheStatsMap.containsKey(location))
             return cacheStatsMap.get(location);
-        }
-        catch (Exception e){
-            return new CacheStats();
-        }
+        return new CacheStats();
     }
 }

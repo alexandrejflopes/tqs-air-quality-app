@@ -5,6 +5,7 @@ import com.example.airquality.entity.*;
 import com.example.airquality.repository.ReportRepository;
 import com.example.airquality.service.ReportService;
 import org.json.simple.parser.ParseException;
+import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,11 +13,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.internal.verification.VerificationModeFactory;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.quality.Strictness;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -26,7 +32,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(MockitoExtension.class)
 public class ReportServiceUnitTest {
 
-    @Mock( lenient = true)
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule().strictness(Strictness.STRICT_STUBS);
+
+    @Mock(lenient = true)
     private ReportRepository reportRepository;
 
     @InjectMocks
@@ -35,18 +44,20 @@ public class ReportServiceUnitTest {
     @BeforeEach
     public void setUp() {
         reportService.setHttpClient(new ReportHttpClient());
+        Location aveiro = new Location(new Coordinates(40.640496, -8.653784), "PT","Aveiro, Aveiro");
 
         Report aveiroReport = setUpAveiroReport();
-        //Location aveiro = aveiroReport.getLocation();
+        Report cachedAveiroReport = setUpCachedReportFrom(aveiroReport);
+
 
         Report antarcticaReport = setUpAntarcticaReport();
-        //Location antarctica = antarcticaReport.getLocation();
 
         // non requested location yet
         Location castanheiraDePera = new Location(new Coordinates(40.00405, -8.202775),"PT","Castanheira de Pera e Coentral, Castanheira de Pera");
 
-        Mockito.when(reportRepository.existsById(aveiroReport.getLocation())).thenReturn(true);
-        Mockito.when(reportRepository.findById(aveiroReport.getLocation())).thenReturn(Optional.of(aveiroReport));
+        Mockito.when(reportRepository.existsById(aveiro)).thenReturn(false).thenReturn(true);
+        Mockito.when(reportRepository.save(aveiroReport)).thenReturn(cachedAveiroReport);
+        Mockito.when(reportRepository.findById(aveiro)).thenReturn(Optional.of(cachedAveiroReport));
         Mockito.when(reportRepository.findById(antarcticaReport.getLocation())).thenReturn(Optional.of(antarcticaReport));
         Mockito.when(reportRepository.findById(castanheiraDePera)).thenReturn(Optional.empty());
     }
@@ -54,11 +65,14 @@ public class ReportServiceUnitTest {
 
 
     @Test
-    public void whenPreviouslyRequestedLocation_thenReportShouldBeFound() {
-        Location aveiro = new Location(new Coordinates(40.640496, -8.653784), "PT","Aveiro, Aveiro");
-        Report fromDB = reportService.getReportByLocation(aveiro);
+    public void whenPreviouslyRequestedLocation_thenReportShouldBeFound() throws ParseException, IOException, URISyntaxException {
+        // perform a request
+        Report aveiro_report = reportService.getReportForInput("Aveiro");
+
+        Report fromDB = reportService.getReportByLocation(aveiro_report.getLocation());
         verifyFindByIdIsCalledOnce();
-        assertThat(fromDB.getLocation()).isEqualTo(aveiro);
+        assertThat(fromDB).isNotNull();
+        assertThat(fromDB.getLocation()).isEqualTo(aveiro_report.getLocation());
     }
 
     @Test
@@ -70,12 +84,14 @@ public class ReportServiceUnitTest {
     }
 
     @Test
-    public void whenPreviouslyRequestedLocation_thenReportShouldExist() {
-        Location aveiro = new Location(new Coordinates(40.640496, -8.653784), "PT","Aveiro, Aveiro");
-        boolean reportExists = reportService.existsReportWithLocation(aveiro);
+    public void whenPreviouslyRequestedLocation_thenReportShouldExist() throws ParseException, IOException, URISyntaxException {
+        // perform a request
+        Report aveiro_report = reportService.getReportForInput("Aveiro");
+
+        boolean reportExists = reportService.existsReportWithLocation(aveiro_report.getLocation());
         assertThat(reportExists).isEqualTo(true);
 
-        verifyExistsByIdIsCalledOnce();
+        verifyExistsByIdIsCalledTwice(); // one in the request, another for checking its existence
 
     }
 
@@ -105,7 +121,6 @@ public class ReportServiceUnitTest {
         String location_input = " ";
         Location fetched = reportService.requestLocationDataForInput(location_input);
 
-        //
         assertThat(fetched).isNull();
     }
 
@@ -149,16 +164,19 @@ public class ReportServiceUnitTest {
     @Test
     public void whenNewRequest_thenNumberOfRequestsShouldIncrementByOne() throws ParseException, IOException, URISyntaxException {
         String location_input = "Aveiro";
-        // initial number of requests
-        double numGlobalRequestsBefore = reportService.getGlobalCacheStats().getNumRequests();
-        double numLocalRequestsBefore = 0;
+        Location aveiro = new Location(new Coordinates(40.640496, -8.653784), "PT","Aveiro, Aveiro");
+
+        // number of requests before the next request
+        int numGlobalRequestsBefore = reportService.getGlobalCacheStats().getNumRequests();
+        int numLocalRequestsBefore = reportService.getLocationCacheStats(aveiro).getNumRequests();
 
         // perform one request
         Report fromDB1 = reportService.getReportForInput(location_input);
+        assertThat(fromDB1.getLocation()).isEqualTo(aveiro);
 
-        double numGlobalRequestsAfter = reportService.getGlobalCacheStats().getNumRequests();
-        double numLocalRequestsAfter = reportService.getLocationCacheStats(fromDB1.getLocation()).getNumRequests();
-        verifyFindByIdIsCalledOnce(); // service must check if the report is cached first
+        int numGlobalRequestsAfter = reportService.getGlobalCacheStats().getNumRequests();
+        int numLocalRequestsAfter = reportService.getLocationCacheStats(fromDB1.getLocation()).getNumRequests();
+        verifyExistsByIdIsCalledOnce(); // to check if the report is cached
 
         assertThat(numGlobalRequestsAfter).isEqualTo(numGlobalRequestsBefore+1);
         assertThat(numLocalRequestsAfter).isEqualTo(numLocalRequestsBefore+1);
@@ -167,51 +185,58 @@ public class ReportServiceUnitTest {
     @Test
     public void whenNeverRequestedLocation_thenNumberOfMissesShouldIncrementByOne() throws ParseException, IOException, URISyntaxException {
         String location_input = "Aveiro";
+        Location aveiro = new Location(new Coordinates(40.640496, -8.653784), "PT","Aveiro, Aveiro");
 
-        // initial number of requests
-        double numGlobalMissesBefore = reportService.getGlobalCacheStats().getMisses();
-        double numLocalMissesBefore = 0;
+        // number of misses before the request
+        int numGlobalMissesBefore = reportService.getGlobalCacheStats().getMisses();
+        int numLocalMissesBefore = reportService.getLocationCacheStats(aveiro).getMisses();
 
         // perform one request
         Report fromDB1 = reportService.getReportForInput(location_input);
+        assertThat(fromDB1.getLocation()).isEqualTo(aveiro);
 
-        double numGlobalMissesAfter = reportService.getGlobalCacheStats().getMisses();
-        double numLocalMissesAfter = reportService.getLocationCacheStats(fromDB1.getLocation()).getMisses();
-        verifyFindByIdIsCalledOnce(); // service must check if the report is cached first
+        int numGlobalMissesAfter = reportService.getGlobalCacheStats().getMisses();
+        int numLocalMissesAfter = reportService.getLocationCacheStats(fromDB1.getLocation()).getMisses();
+        verifyExistsByIdIsCalledOnce(); // to check if the report is cached
 
         assertThat(numGlobalMissesAfter).isEqualTo(numGlobalMissesBefore+1);
         assertThat(numLocalMissesAfter).isEqualTo(numLocalMissesBefore+1);
     }
 
-    // TODO: failing test
-    /*
+
     @Test
     public void whenPrevouslyRequestedLocation_thenNumberOfHitsShouldIncrementByOne() throws ParseException, IOException, URISyntaxException {
         String location_input = "Aveiro";
         Location aveiro = new Location(new Coordinates(40.640496, -8.653784), "PT","Aveiro, Aveiro");
 
-        // initial number of hits for this location
-        double numGlobalHitsBefore = reportService.getGlobalCacheStats().getHits();
-        double numLocalHitsBefore = 0;
+        // number of hits before the request
+        int numGlobalHitsBefore = reportService.getGlobalCacheStats().getHits();
+        int numLocalHitsBefore = reportService.getLocationCacheStats(aveiro).getHits();
 
+        // perform two requests
         Report fromDB1 = reportService.getReportForInput(location_input);
         Report fromDB2 = reportService.getReportForInput(location_input);
-
-        System.err.println("fromDB1");
-        System.err.println(fromDB1);
-        System.err.println("------------------------");
-        System.err.println("fromDB2");
-        System.err.println(fromDB2);
-
         assertThat(fromDB1.getLocation()).isEqualTo(fromDB2.getLocation()).isEqualTo(aveiro);
 
-        double numGlobalHitsAfter = reportService.getGlobalCacheStats().getHits();
-        double numLocalHitsAfter = reportService.getLocationCacheStats(aveiro).getHits();
-        verifyFindByIdIsCalledTwice(); // service must check if the report is cached first
+        /*
+         * as timestamps change slightly between requests
+         * we need to guarantee that the testing reports
+         * have the same timestamps in order to have a 'fair' comparison;
+         * if all went right, all the rest should be the same
+         * */
+        fromDB2 = updateMetrics(fromDB2,fromDB1);
+
+        // fromDB2 should be equal to fromDB1, as fromDB2
+        // should be fromDB1 retrieved from cache
+        assertThat(fromDB1).isEqualTo(fromDB2);
+
+        int numGlobalHitsAfter = reportService.getGlobalCacheStats().getHits();
+        int numLocalHitsAfter = reportService.getLocationCacheStats(aveiro).getHits();
+        verifyExistsByIdIsCalledTwice(); // to check if the report is cached in each request
 
         assertThat(numGlobalHitsAfter).isEqualTo(numGlobalHitsBefore+1);
         assertThat(numLocalHitsAfter).isEqualTo(numLocalHitsBefore+1);
-    }*/
+    }
 
 
     private void verifyFindByIdIsCalledOnce() {
@@ -234,12 +259,29 @@ public class ReportServiceUnitTest {
         Mockito.reset(reportRepository);
     }
 
+    private void verifyExistsByIdIsCalledTwice() {
+        Mockito.verify(reportRepository, VerificationModeFactory.times(2)).existsById(Mockito.any(Location.class));
+        Mockito.reset(reportRepository);
+    }
+
+    private void verifySaveIsCalledTwice() {
+        Mockito.verify(reportRepository, VerificationModeFactory.times(2)).save(Mockito.any(Report.class));
+        Mockito.reset(reportRepository);
+    }
+
     public Report setUpAveiroReport(){
         Location aveiro = new Location(new Coordinates(40.640496, -8.653784), "PT","Aveiro, Aveiro");
 
         Report aveiroReport = new Report();
-        aveiroReport.setRequestTimeStamp(LocalDateTime.parse("2020-04-08T13:29:15"));
-        aveiroReport.setLastUpdatedAt(LocalDateTime.parse("2020-04-08T13:00"));
+        aveiroReport.setRequestTimeStamp((ZonedDateTime.now(ZoneId.of("UTC"))).toLocalDateTime());
+        int thisMonth = aveiroReport.getRequestTimeStamp().getMonthValue();
+        String monthValue = thisMonth < 10 ? "0"+thisMonth : String.valueOf(thisMonth);
+        String lastUpd =    aveiroReport.getRequestTimeStamp().getYear() + "-" +
+                            monthValue + "-" +
+                            aveiroReport.getRequestTimeStamp().getDayOfMonth() + "T" +
+                            aveiroReport.getRequestTimeStamp().getHour() + ":00";
+
+        aveiroReport.setLastUpdatedAt(LocalDateTime.parse(lastUpd));
         aveiroReport.setLocation(aveiro);
         aveiroReport.setDataAvailable(true);
         Pollutant dominantPollutant = new Pollutant("03","Ozone", new Concentration(29.75,"ppb"));
@@ -263,6 +305,22 @@ public class ReportServiceUnitTest {
         return aveiroReport;
     }
 
+    public Report setUpCachedReportFrom(Report report){
+        Report cachedReport = report;
+
+        // set expected stats when the report for same location is requested again
+        // hit: +1 ; miss: +0 ; numRequests: +1
+        cachedReport.getGlobalCacheStats().addHit();
+        cachedReport.getGlobalCacheStats().addRequest();
+        cachedReport.getLocationCacheStats().addHit();
+        cachedReport.getLocationCacheStats().addRequest();
+
+        // granting that timestamps are equal (just for testing comparisons)
+        cachedReport.setRequestTimeStamp(report.getRequestTimeStamp());
+
+        return cachedReport;
+    }
+
     public Report setUpAntarcticaReport(){
         Location antarctica = new Location(new Coordinates(-82.108182, 34.37824), "AQ",", ");
 
@@ -275,5 +333,17 @@ public class ReportServiceUnitTest {
         antarcticaReport.setErrorTitle("Location Specified Is Unsupported");
 
         return antarcticaReport;
+    }
+
+    private Report updateMetrics(Report toUpdate, Report withNewMetrics){
+        toUpdate.setIndex(withNewMetrics.getIndex());
+        toUpdate.setPollutants(withNewMetrics.getPollutants());
+        toUpdate.setLastUpdatedAt(withNewMetrics.getLastUpdatedAt());
+        toUpdate.setRequestTimeStamp(withNewMetrics.getRequestTimeStamp());
+
+        // granting that cache stats ids are the same
+        toUpdate.getGlobalCacheStats().setId(withNewMetrics.getGlobalCacheStats().getId());
+        toUpdate.getLocationCacheStats().setId(withNewMetrics.getLocationCacheStats().getId());
+        return toUpdate;
     }
 }

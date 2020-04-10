@@ -25,7 +25,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = AirQualityWebAppApplication.class)
 @AutoConfigureMockMvc
-// @TestPropertySource(locations = "application-integrationtest.properties")
 @AutoConfigureTestDatabase
 public class ReportRestControllerIT {
 
