@@ -14,8 +14,6 @@ import java.util.Optional;
 public interface ReportRepository extends JpaRepository<Report, Location> {
 
 
-    @Override
-    List<Report> findAll();
 
     @Override
     Optional<Report> findById(Location location);

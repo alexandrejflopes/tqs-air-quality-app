@@ -36,7 +36,6 @@ public class ReportRestControllerTemplateIT {
 
     @AfterEach
     public void resetDb() {
-        //System.err.println("--------- reset ----------");
         reportRepository.deleteAll();
     }
 

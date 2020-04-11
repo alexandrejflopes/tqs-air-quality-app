@@ -3,6 +3,7 @@ package com.example.airquality.controller;
 
 import com.example.airquality.client.ReportHttpClient;
 import com.example.airquality.entity.Report;
+import com.example.airquality.exception.InvalidLocationException;
 import com.example.airquality.service.ReportService;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,11 +24,10 @@ public class ReportRestController {
 
     //@GetMapping(path="/location/{location}", produces = "application/json")
     @GetMapping("/location/{location}")
-    public Report getReportForLocation(@PathVariable(name = "location") String location) throws ParseException, IOException, URISyntaxException {
+    public Report getReportForLocation(@PathVariable(name = "location") String location) throws ParseException, IOException, URISyntaxException, InvalidLocationException {
         reportService.setHttpClient(new ReportHttpClient());
         return reportService.getReportForInput(location);
     }
-
 
 
 }

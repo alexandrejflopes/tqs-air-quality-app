@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>com.example.airquality.client</OriginalElement>
+  <nodes>
+    <node x="0.0" y="110.0">com.example.airquality.client.ReportHttpClient</node>
+    <node x="16.5" y="0.0">com.example.airquality.client.TqsHttpClient</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="com.example.airquality.client.ReportHttpClient" target="com.example.airquality.client.TqsHttpClient">
+      <point x="0.0" y="-30.0" />
+      <point x="0.0" y="30.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.0" x="112.0" y="83.0" />
+  <SelectedNodes />
+  <Categories>
+    <Category>Methods</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

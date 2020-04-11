@@ -2,6 +2,7 @@ package com.example.airquality.controller;
 
 import com.example.airquality.client.ReportHttpClient;
 import com.example.airquality.entity.Report;
+import com.example.airquality.exception.InvalidLocationException;
 import com.example.airquality.service.ReportService;
 import org.json.simple.parser.ParseException;
 import org.springframework.stereotype.Controller;
@@ -30,17 +31,11 @@ public class ReportController {
     }
 
     @GetMapping(value = "/report")
-    public String showReport(Model model, @RequestParam (value = "location") String location) throws ParseException, IOException, URISyntaxException {
+    public String showReport(Model model, @RequestParam (value = "location") String location) throws ParseException, IOException, URISyntaxException, InvalidLocationException {
         Report report = reportService.getReportForInput(location);
         model.addAttribute("report",report);
         return "report_result";
     }
-
-    @GetMapping(value = "/error")
-    public String showError() {
-        return "error";
-    }
-
 
 
 

@@ -100,7 +100,7 @@
                                             <h5 th:text="${pollutant.displayName}"></h5>
                                             <p th:text="${pollutant.fullName}" class="text-secondary text-break"></p>
                                             <hr />
-                                            <p th:text="${report.index.dominantPollutant.concentration.value + ' ' + report.index.dominantPollutant.concentration.units}"></p>
+                                            <p th:text="${pollutant.concentration.value + ' ' + pollutant.concentration.units}"></p>
                                         </div>
                                     </div>
                                 </th:block>

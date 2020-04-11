@@ -2,6 +2,7 @@ package com.example.airquality.service;
 
 import com.example.airquality.client.ReportHttpClient;
 import com.example.airquality.entity.*;
+import com.example.airquality.exception.InvalidLocationException;
 import com.example.airquality.repository.ReportRepository;
 import org.apache.http.client.utils.URIBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URISyntaxException;
+import java.rmi.UnexpectedException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -58,14 +60,14 @@ public class ReportService {
         return reportRepository.save(report);
     }
 
-    public Report getReportForInput(String userInput) throws IOException, URISyntaxException, ParseException {
+    public Report getReportForInput(String userInput) throws IOException, URISyntaxException, ParseException, InvalidLocationException {
 
         Location location = requestLocationDataForInput(userInput);
 
         boolean invalidLocation = location == null || location.getCoordinates()==null || location.getAddress() == null || location.getCountryCode() == null;
 
         if(invalidLocation){
-            return null;
+            throw new InvalidLocationException();
         }
 
         CacheStats locationCacheStats;
@@ -108,11 +110,17 @@ public class ReportService {
             ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
             LocalDateTime lastRequestTimeStamp = report.getRequestTimeStamp();
 
-            boolean differentHourOrDay = (now.getHour() != lastRequestTimeStamp.getHour()) ||
+            boolean differentHour = (now.getHour() != lastRequestTimeStamp.getHour()) &&
+                                    (now.getMinute()>=2); // give some time to external API to update
+
+            boolean differentHourOrDay = differentHour ||
                                         (   now.getDayOfMonth()!=lastRequestTimeStamp.getDayOfMonth() ||
                                             now.getMonthValue()!=lastRequestTimeStamp.getMonthValue() ||
                                             now.getYear()!=lastRequestTimeStamp.getYear()
                                         );
+
+            System.err.println("now hour -> " + now.getHour());
+            System.err.println("lastRequestTimeStamp hour -> " + lastRequestTimeStamp.getHour());
 
             if(differentHourOrDay){
                 /*
@@ -165,12 +173,12 @@ public class ReportService {
 
     }
 
-    public Report requestNewReportForLocation(Location location) throws URISyntaxException, IOException, ParseException {
+    public Report requestNewReportForLocation(Location location) throws URISyntaxException, IOException, ParseException, InvalidLocationException {
 
-        boolean invalidLocation = location.getCoordinates()==null || location.getAddress() == null || location.getCountryCode() == null;
+        boolean invalidLocation = location == null || location.getCoordinates()==null || location.getAddress() == null || location.getCountryCode() == null;
 
         if(invalidLocation){
-            return null;
+            throw new InvalidLocationException();
         }
 
         String lat = String.valueOf(location.getCoordinates().getLatitude());

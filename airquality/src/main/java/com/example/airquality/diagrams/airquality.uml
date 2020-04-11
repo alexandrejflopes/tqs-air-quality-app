@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>com.example.airquality</OriginalElement>
+  <nodes>
+    <node x="255.05263157894734" y="226.0">com.example.airquality.entity.CacheStats</node>
+    <node x="811.4098396606272" y="226.0">com.example.airquality.entity.Index</node>
+    <node x="460.49561403508767" y="818.0">com.example.airquality.controller.ReportController</node>
+    <node x="776.7848396606272" y="108.0">com.example.airquality.entity.Pollutant</node>
+    <node x="460.04824561403507" y="492.0">com.example.airquality.repository.ReportRepository</node>
+    <node x="16.5" y="384.0">com.example.airquality.client.TqsHttpClient</node>
+    <node x="343.99561403508767" y="670.0">com.example.airquality.service.ReportService</node>
+    <node x="463.6677631578948" y="0.0">com.example.airquality.entity.Concentration</node>
+    <node x="0.0" y="492.0">com.example.airquality.client.ReportHttpClient</node>
+    <node x="172.49561403508767" y="818.0">com.example.airquality.controller.ReportRestController</node>
+    <node x="705.0482456140351" y="384.0">com.example.airquality.entity.Report</node>
+    <node x="457.60605406960036" y="108.0">com.example.airquality.entity.Coordinates</node>
+    <node x="508.10605406960036" y="226.0">com.example.airquality.entity.Location</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="com.example.airquality.controller.ReportController" target="com.example.airquality.entity.Report">
+      <point x="89.59999999999997" y="-29.0" />
+      <point x="662.0956140350876" y="798.0" />
+      <point x="804.1301984469372" y="798.0" />
+      <point x="804.1301984469372" y="467.0" />
+      <point x="809.5482456140351" y="467.0" />
+      <point x="47.49999999999997" y="29.0" />
+    </edge>
+    <edge source="com.example.airquality.entity.Index" target="com.example.airquality.entity.Pollutant">
+      <point x="25.75" y="-29.0" />
+      <point x="888.6598396606272" y="206.0" />
+      <point x="862.5348396606272" y="206.0" />
+      <point x="12.25" y="29.0" />
+    </edge>
+    <edge source="com.example.airquality.entity.Report" target="com.example.airquality.entity.CacheStats">
+      <point x="-49.875" y="-29.0" />
+      <point x="712.1732456140351" y="334.0" />
+      <point x="373.55263157894734" y="334.0" />
+      <point x="39.5" y="29.0" />
+    </edge>
+    <edge source="com.example.airquality.controller.ReportRestController" target="com.example.airquality.client.ReportHttpClient">
+      <point x="-89.33333333333326" y="-29.0" />
+      <point x="217.1622807017544" y="798.0" />
+      <point x="14.725855622663175" y="798.0" />
+      <point x="14.725855622663175" y="650.0" />
+      <point x="28.0" y="650.0" />
+      <point x="-84.0" y="29.0" />
+    </edge>
+    <edge source="com.example.airquality.controller.ReportRestController" target="com.example.airquality.entity.Report">
+      <point x="89.33333333333337" y="-29.0" />
+      <point x="395.82894736842104" y="778.0" />
+      <point x="771.0745614035088" y="778.0" />
+      <point x="9.5" y="29.0" />
+    </edge>
+    <edge source="com.example.airquality.service.ReportService" target="com.example.airquality.entity.Coordinates">
+      <point x="-10.052631578947341" y="-29.0" />
+      <point x="429.44298245614027" y="570.0" />
+      <point x="423.55263157894734" y="570.0" />
+      <point x="423.55263157894734" y="206.0" />
+      <point x="485.77272073626705" y="206.0" />
+      <point x="-56.333333333333314" y="29.0" />
+    </edge>
+    <edge source="com.example.airquality.service.ReportService" target="com.example.airquality.client.ReportHttpClient">
+      <point x="-90.4736842105263" y="-29.0" />
+      <point x="349.0219298245613" y="650.0" />
+      <point x="140.0" y="650.0" />
+      <point x="28.0" y="29.0" />
+    </edge>
+    <edge source="com.example.airquality.controller.ReportController" target="com.example.airquality.client.ReportHttpClient">
+      <point x="-89.60000000000002" y="-29.0" />
+      <point x="482.89561403508765" y="768.0" />
+      <point x="61.5" y="768.0" />
+      <point x="61.5" y="650.0" />
+      <point x="84.0" y="650.0" />
+      <point x="-28.0" y="29.0" />
+    </edge>
+    <edge source="com.example.airquality.controller.ReportRestController" target="com.example.airquality.service.ReportService">
+      <point x="0.0" y="-29.0" />
+      <point x="306.49561403508767" y="798.0" />
+      <point x="375.8289473684209" y="798.0" />
+      <point x="-63.666666666666686" y="29.0" />
+    </edge>
+    <edge source="com.example.airquality.entity.Report" target="com.example.airquality.entity.Pollutant">
+      <point x="7.125" y="-29.0" />
+      <point x="769.1732456140351" y="196.0" />
+      <point x="789.0348396606272" y="196.0" />
+      <point x="-61.25" y="29.0" />
+    </edge>
+    <edge source="com.example.airquality.repository.ReportRepository" target="com.example.airquality.entity.Location">
+      <point x="-56.0" y="-29.0" />
+      <point x="516.0482456140351" y="364.0" />
+      <point x="564.772720736267" y="364.0" />
+      <point x="-11.333333333333314" y="29.0" />
+    </edge>
+    <edge source="com.example.airquality.entity.Report" target="com.example.airquality.entity.Index">
+      <point x="35.625" y="-29.0" />
+      <point x="797.6732456140351" y="354.0" />
+      <point x="824.2848396606272" y="354.0" />
+      <point x="-38.625" y="29.0" />
+    </edge>
+    <edge source="com.example.airquality.service.ReportService" target="com.example.airquality.entity.Location">
+      <point x="30.157894736842138" y="-29.0" />
+      <point x="469.65350877192975" y="590.0" />
+      <point x="694.5482456140351" y="590.0" />
+      <point x="694.5482456140351" y="364.0" />
+      <point x="587.4393874029338" y="364.0" />
+      <point x="11.333333333333371" y="29.0" />
+    </edge>
+    <edge source="com.example.airquality.entity.Location" target="com.example.airquality.entity.Coordinates">
+      <point x="34.0" y="-29.0" />
+      <point x="610.1060540696003" y="206.0" />
+      <point x="598.4393874029338" y="206.0" />
+      <point x="56.33333333333337" y="29.0" />
+    </edge>
+    <edge source="com.example.airquality.service.ReportService" target="com.example.airquality.entity.Index">
+      <point x="60.315789473684276" y="-29.0" />
+      <point x="499.81140350877195" y="620.0" />
+      <point x="875.7848396606272" y="620.0" />
+      <point x="12.875" y="29.0" />
+    </edge>
+    <edge source="com.example.airquality.entity.Pollutant" target="com.example.airquality.entity.Concentration">
+      <point x="36.75" y="-29.0" />
+      <point x="887.0348396606272" y="78.0" />
+      <point x="630.7927631578948" y="78.0" />
+      <point x="71.625" y="29.0" />
+    </edge>
+    <edge source="com.example.airquality.client.ReportHttpClient" target="com.example.airquality.client.TqsHttpClient">
+      <point x="0.0" y="-29.0" />
+      <point x="0.0" y="29.0" />
+    </edge>
+    <edge source="com.example.airquality.service.ReportService" target="com.example.airquality.repository.ReportRepository">
+      <point x="20.105263157894797" y="-29.0" />
+      <point x="459.60087719298247" y="580.0" />
+      <point x="572.0482456140351" y="580.0" />
+      <point x="0.0" y="29.0" />
+    </edge>
+    <edge source="com.example.airquality.repository.ReportRepository" target="com.example.airquality.entity.Report">
+      <point x="56.0" y="-29.0" />
+      <point x="628.0482456140351" y="467.0" />
+      <point x="714.5482456140351" y="467.0" />
+      <point x="-47.5" y="29.0" />
+    </edge>
+    <edge source="com.example.airquality.entity.Report" target="com.example.airquality.entity.Location">
+      <point x="-7.125" y="-29.0" />
+      <point x="754.9232456140351" y="304.0" />
+      <point x="632.772720736267" y="304.0" />
+      <point x="56.66666666666663" y="29.0" />
+    </edge>
+    <edge source="com.example.airquality.service.ReportService" target="com.example.airquality.entity.CacheStats">
+      <point x="-30.157894736842024" y="-29.0" />
+      <point x="409.3377192982456" y="590.0" />
+      <point x="312.7456140350878" y="590.0" />
+      <point x="312.7456140350878" y="354.0" />
+      <point x="320.88596491228066" y="354.0" />
+      <point x="-13.166666666666686" y="29.0" />
+    </edge>
+    <edge source="com.example.airquality.service.ReportService" target="com.example.airquality.entity.Pollutant">
+      <point x="80.42105263157902" y="-29.0" />
+      <point x="519.9166666666666" y="640.0" />
+      <point x="924.9098396606272" y="640.0" />
+      <point x="924.9098396606272" y="196.0" />
+      <point x="887.0348396606272" y="196.0" />
+      <point x="36.75" y="29.0" />
+    </edge>
+    <edge source="com.example.airquality.service.ReportService" target="com.example.airquality.entity.Concentration">
+      <point x="-60.31578947368416" y="-29.0" />
+      <point x="379.1798245614035" y="620.0" />
+      <point x="244.55263157894734" y="620.0" />
+      <point x="244.55263157894734" y="88.0" />
+      <point x="535.2927631578948" y="88.0" />
+      <point x="-23.875" y="29.0" />
+    </edge>
+    <edge source="com.example.airquality.controller.ReportController" target="com.example.airquality.service.ReportService">
+      <point x="-44.80000000000001" y="-29.0" />
+      <point x="527.6956140350876" y="758.0" />
+      <point x="439.49561403508767" y="758.0" />
+      <point x="0.0" y="29.0" />
+    </edge>
+    <edge source="com.example.airquality.service.ReportService" target="com.example.airquality.entity.Report">
+      <point x="40.21052631578954" y="-29.0" />
+      <point x="479.70614035087715" y="600.0" />
+      <point x="739.811155450101" y="600.0" />
+      <point x="739.811155450101" y="467.0" />
+      <point x="733.5482456140351" y="467.0" />
+      <point x="-28.5" y="29.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="0.8" x="675.0238095238094" y="459.38492063492083" />
+  <SelectedNodes />
+  <Categories />
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

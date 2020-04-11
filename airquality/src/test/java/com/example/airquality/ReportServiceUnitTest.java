@@ -2,6 +2,7 @@ package com.example.airquality;
 
 import com.example.airquality.client.ReportHttpClient;
 import com.example.airquality.entity.*;
+import com.example.airquality.exception.InvalidLocationException;
 import com.example.airquality.repository.ReportRepository;
 import com.example.airquality.service.ReportService;
 import org.json.simple.parser.ParseException;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 public class ReportServiceUnitTest {
@@ -65,7 +67,7 @@ public class ReportServiceUnitTest {
 
 
     @Test
-    public void whenPreviouslyRequestedLocation_thenReportShouldBeFound() throws ParseException, IOException, URISyntaxException {
+    public void whenPreviouslyRequestedLocation_thenReportShouldBeFound() throws ParseException, IOException, URISyntaxException, InvalidLocationException {
         // perform a request
         Report aveiro_report = reportService.getReportForInput("Aveiro");
 
@@ -84,7 +86,7 @@ public class ReportServiceUnitTest {
     }
 
     @Test
-    public void whenPreviouslyRequestedLocation_thenReportShouldExist() throws ParseException, IOException, URISyntaxException {
+    public void whenPreviouslyRequestedLocation_thenReportShouldExist() throws ParseException, IOException, URISyntaxException, InvalidLocationException {
         // perform a request
         Report aveiro_report = reportService.getReportForInput("Aveiro");
 
@@ -125,7 +127,7 @@ public class ReportServiceUnitTest {
     }
 
     @Test
-    public void whenValidInput_thenReportShouldBeFetched() throws ParseException, IOException, URISyntaxException {
+    public void whenValidInput_thenReportShouldBeFetched() throws ParseException, IOException, URISyntaxException, InvalidLocationException {
         String location_input = "Aveiro";
         Report fetched = reportService.getReportForInput(location_input);
 
@@ -135,15 +137,13 @@ public class ReportServiceUnitTest {
     }
 
     @Test
-    public void whenInvalidInput_thenReportShouldNotBeFetched() throws ParseException, IOException, URISyntaxException {
+    public void whenInvalidInput_thenInvalidLocationExceptionShouldBeThrown() {
         String location_input = " ";
-        Report fetched = reportService.getReportForInput(location_input);
-
-        assertThat(fetched).isNull();
+        assertThrows(InvalidLocationException.class, () -> reportService.getReportForInput(location_input));
     }
 
     @Test
-    public void whenValidLocation_thenReportShouldBeFetched() throws ParseException, IOException, URISyntaxException {
+    public void whenValidLocation_thenReportShouldBeFetched() throws ParseException, IOException, URISyntaxException, InvalidLocationException {
         Location antarctica = new Location(new Coordinates(-82.108182, 34.37824), "AQ",", ");
         Report fetched = reportService.requestNewReportForLocation(antarctica);
 
@@ -151,18 +151,16 @@ public class ReportServiceUnitTest {
     }
 
     @Test
-    public void whenInValidLocation_thenReportShouldBeFetched() throws ParseException, IOException, URISyntaxException {
+    public void whenInValidLocation_thenInvalidLocationExceptionShouldBeThrown() {
         Location emptyLocation = new Location();
-        Report fetched = reportService.requestNewReportForLocation(emptyLocation);
-
-        assertThat(fetched).isNull();
+        assertThrows(InvalidLocationException.class, () -> reportService.requestNewReportForLocation(emptyLocation));
     }
 
 
     // cache statistics tests
 
     @Test
-    public void whenNewRequest_thenNumberOfRequestsShouldIncrementByOne() throws ParseException, IOException, URISyntaxException {
+    public void whenNewRequest_thenNumberOfRequestsShouldIncrementByOne() throws ParseException, IOException, URISyntaxException, InvalidLocationException {
         String location_input = "Aveiro";
         Location aveiro = new Location(new Coordinates(40.640496, -8.653784), "PT","Aveiro, Aveiro");
 
@@ -183,7 +181,7 @@ public class ReportServiceUnitTest {
     }
 
     @Test
-    public void whenNeverRequestedLocation_thenNumberOfMissesShouldIncrementByOne() throws ParseException, IOException, URISyntaxException {
+    public void whenNeverRequestedLocation_thenNumberOfMissesShouldIncrementByOne() throws ParseException, IOException, URISyntaxException, InvalidLocationException {
         String location_input = "Aveiro";
         Location aveiro = new Location(new Coordinates(40.640496, -8.653784), "PT","Aveiro, Aveiro");
 
@@ -205,7 +203,7 @@ public class ReportServiceUnitTest {
 
 
     @Test
-    public void whenPrevouslyRequestedLocation_thenNumberOfHitsShouldIncrementByOne() throws ParseException, IOException, URISyntaxException {
+    public void whenPrevouslyRequestedLocation_thenNumberOfHitsShouldIncrementByOne() throws ParseException, IOException, URISyntaxException, InvalidLocationException {
         String location_input = "Aveiro";
         Location aveiro = new Location(new Coordinates(40.640496, -8.653784), "PT","Aveiro, Aveiro");
 

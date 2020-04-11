@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>com.example.airquality.entity</OriginalElement>
+  <nodes>
+    <node x="201.0" y="349.0">com.example.airquality.entity.CacheStats</node>
+    <node x="443.3333333333333" y="0.0">com.example.airquality.entity.Concentration</node>
+    <node x="379.0" y="337.0">com.example.airquality.entity.Index</node>
+    <node x="431.3333333333333" y="157.0">com.example.airquality.entity.Pollutant</node>
+    <node x="257.375" y="560.0">com.example.airquality.entity.Report</node>
+    <node x="6.0" y="180.5">com.example.airquality.entity.Coordinates</node>
+    <node x="0.0" y="360.5">com.example.airquality.entity.Location</node>
+  </nodes>
+  <notes />
+  <edges />
+  <settings layout="Hierarchic Group" zoom="1.0" x="319.5" y="425.5" />
+  <SelectedNodes>
+    <node>com.example.airquality.entity.Index</node>
+  </SelectedNodes>
+  <Categories>
+    <Category>Fields</Category>
+    <Category>Properties</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

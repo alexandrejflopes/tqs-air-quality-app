@@ -28,7 +28,8 @@
 
             <div>
                 <div id="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <strong>ERROR</strong><br />Something unexpected ocurred. Sorry.
+                    <strong>ERROR (<span th:text="${error}"></span>)</strong><br /><span th:text="${message}"></span>
+                    <!-- Something unexpected ocurred. Sorry. -->
                 </div>
             </div>
         </form>
