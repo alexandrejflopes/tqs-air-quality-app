@@ -19,6 +19,8 @@ import org.mockito.junit.MockitoRule;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.quality.Strictness;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
@@ -234,6 +236,20 @@ public class ReportServiceUnitTest {
 
         assertThat(numGlobalHitsAfter).isEqualTo(numGlobalHitsBefore+1);
         assertThat(numLocalHitsAfter).isEqualTo(numLocalHitsBefore+1);
+    }
+
+
+    // test to the reader that setup api keys
+    @Test
+    public void whenReadKeyFromFile_thenCorrect() throws IOException {
+        String expected_key = "zB8zqDRHU5QIZxabKtiTQGSoHeOMXNeK";
+        String file ="src/test/resources/mapquestKey.txt";
+
+        BufferedReader reader = new BufferedReader(new FileReader(file));
+        String key = reader.readLine();
+        reader.close();
+
+        assertThat(key).isEqualTo(expected_key);
     }
 
 

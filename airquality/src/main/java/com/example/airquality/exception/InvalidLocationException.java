@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class InvalidLocationException extends Exception {
 
     public InvalidLocationException() {
-        super("Location is invalid.");
+        super("Could not geocode that location. Causes might be invalid location provided or invalid MapQuest API Key");
     }
 
     @Override

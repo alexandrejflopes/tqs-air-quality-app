@@ -9,8 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.net.URISyntaxException;
-import java.rmi.UnexpectedException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -27,9 +28,14 @@ import java.io.IOException;
 @Transactional
 public class ReportService {
 
-    public static final String GEOCODING_BASE_URL = "http://open.mapquestapi.com/geocoding/v1/address?key=zB8zqDRHU5QIZxabKtiTQGSoHeOMXNeK";
+    private static final String BREEZOMETER_API_KEY = setUpBreezometerApiKey();
+    private static final String MAPQUEST_API_KEY = setUpMapQuestApiKey();
 
-    public static final String BREEZOMETER_BASE_URL = "https://api.breezometer.com/air-quality/v2/current-conditions?key=09e19031c4764f0097225dd225826731";
+
+    public static final String GEOCODING_BASE_URL = "http://open.mapquestapi.com/geocoding/v1/address?key="+MAPQUEST_API_KEY;
+
+    public static final String BREEZOMETER_BASE_URL = "https://api.breezometer.com/air-quality/v2/current-conditions?key="+BREEZOMETER_API_KEY;
+
 
     private CacheStats globalCacheStats = new CacheStats();
 
@@ -40,6 +46,38 @@ public class ReportService {
 
     public void setHttpClient(ReportHttpClient httpClient) {
         this.httpClient = httpClient;
+    }
+
+    private static String setUpBreezometerApiKey() {
+
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader("src/main/java/com/example/airquality/breezometerKey.txt"));
+            String key = reader.readLine();
+            reader.close();
+
+            return key;
+        }
+        catch (Exception e){
+            // default key
+            return "09e19031c4764f0097225dd225826731";
+        }
+
+    }
+
+    private static String setUpMapQuestApiKey() {
+
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader("src/main/java/com/example/airquality/mapquestKey.txt"));
+            String key = reader.readLine();
+            reader.close();
+
+            return key;
+        }
+        catch (Exception e){
+            // default key
+            return "zB8zqDRHU5QIZxabKtiTQGSoHeOMXNeK";
+        }
+
     }
 
     @Autowired
@@ -119,8 +157,8 @@ public class ReportService {
                                             now.getYear()!=lastRequestTimeStamp.getYear()
                                         );
 
-            System.err.println("now hour -> " + now.getHour());
-            System.err.println("lastRequestTimeStamp hour -> " + lastRequestTimeStamp.getHour());
+            //System.err.println("now hour -> " + now.getHour());
+            //System.err.println("lastRequestTimeStamp hour -> " + lastRequestTimeStamp.getHour());
 
             if(differentHourOrDay){
                 /*
