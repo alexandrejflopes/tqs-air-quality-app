@@ -15,3 +15,6 @@ Once the application is running, you can access the url `http://localhost:8080/`
 
 ## Documentation
 More information about the overall project development and the developed API can be seen in the report available in this repository.
+
+## License
+This project is licensed under the MIT License - see the [LICENSE file](https://github.com/alexandrejflopes/tqs-air-quality-app/blob/master/LICENSE) for details.
