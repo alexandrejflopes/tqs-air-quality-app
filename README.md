@@ -9,7 +9,9 @@ In particular, this application should provide details on air quality for a give
 ## How to run
 The application project is the folder "airquality" in this repository. This will be our root directory.\
 You can test this application by downloading the source code in this repository and run it directly from your favorite IDE.\
-If you prefer, you can run it throught the command line. For that, you can execute `mvn spring-boot:run` in the root of the project or run the packaged application version (a JAR) executing java `-jar target/<jar_path>`, being `jar_path` the path of JAR archive of the application. If you are in the root of the project, `jar_path` will be `target/airquality-0.0.1-SNAPSHOT.jar`.
+If you prefer, you can run it throught the command line. For that, you can execute `mvn spring-boot:run` in the root of the project or run the packaged application version (a JAR) executing java `-jar target/<jar_path>`, being `jar_path` the path of JAR archive of the application. If you are in the root of the project, `jar_path` will be `target/airquality-0.0.1-SNAPSHOT.jar`.\
+\
+Once the application is running, you can access the url `http://localhost:8080/` in your web browser and interact with the user interface.
 
 ## Documentation
 More information about the overall project development and the developed API can be seen in the report available in this repository.
