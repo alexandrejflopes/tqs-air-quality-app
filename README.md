@@ -3,7 +3,7 @@ Minimalist web app that provides details on air quality for a certain region/cit
 
 
 ## Overview
-This application is the result of an assignment of the [Software Quality And Tests] (https://www.ua.pt/pt/uc/8109) course. The goal was to develop a multi-layer web application in Spring Boot with automated tests of different types (unit tests, service level tests, integration tests, and functional testing, mainly on the web interface). \
+This application is the result of an assignment of the [Software Quality And Tests](https://www.ua.pt/pt/uc/8109) course. The goal was to develop a multi-layer web application in Spring Boot with automated tests of different types (unit tests, service level tests, integration tests, and functional testing, mainly on the web interface). \
 In particular, this application should provide details on air quality for a given location (provided by the user) showing metrics like particles in suspension or gases present. To achieve these objectives, the project should include different components: a web page, that allows the interaction with the user; integration with external sources, like a third-party API to fetch that air quality data; an in-memory cache to save the latest results from that API; and its own REST API that can be called by external clients and obtain air quality data as well.
 
 ## How to run
