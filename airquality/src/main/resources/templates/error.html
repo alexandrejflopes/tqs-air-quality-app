@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>TQS - Air Quality Meter</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="./styles.css">
+    <script src="https://kit.fontawesome.com/f379375b47.js" crossorigin="anonymous"></script>
+</head>
+<body class="d-flex flex-column h-100">
+
+<div class="jumbotron jumbotron-fluid" style=" background-image: url('air_fundo.jpeg')">
+    <div class="container" style="color: whitesmoke; background: #00000020; padding: 10px">
+        <h1 class="display-4">TQS Air Quality Meter</h1>
+        <p class="lead">Minimalist web app that provides details on air quality for a certain region/city</p>
+    </div>
+</div>
+
+
+<main role="main" style="margin-bottom: 100px">
+    <div class="container">
+        <form th:action="@{/}" method="get">
+            <div class="input-group mb-3">
+                <button type="submit" class="input-group-text badge-info border-info" id="back_button"><i class="fas fa-arrow-left" style="margin-right: 10px"></i>Back to search</button>
+            </div>
+
+
+
+            <div>
+                <div id="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <strong>ERROR (<span th:text="${error}"></span>)</strong><br /><span th:text="${message}"></span>
+                    <!-- Something unexpected ocurred. Sorry. -->
+                </div>
+            </div>
+        </form>
+
+    </div>
+
+
+</main>
+
+<footer class="footer mt-auto py-3">
+    <div class="container">
+        <span class="text-muted">Author: Alexandre Lopes | 88969</span>
+    </div>
+</footer>
+
+
+
+
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+</body>
+</html>
